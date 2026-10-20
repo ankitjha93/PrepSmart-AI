@@ -330,6 +330,18 @@ export function AuthProvider({ children }) {
         redirectTo: callbackUrl,
       },
     });
+
+    if (res?.data?.url && typeof window !== 'undefined') {
+      window.location.href = res.data.url;
+    }
+
+    if (res?.error) {
+      const msg = res.error.message || '';
+      if (msg.includes('provider is not enabled') || msg.includes('validation_failed')) {
+        res.error.friendlyMessage = `${provider.charAt(0).toUpperCase() + provider.slice(1)} OAuth is not yet enabled in your Supabase project. Please add your Client ID & Secret in Supabase Auth Providers, or use the 1-Click Demo button.`;
+      }
+    }
+
     return res;
   };
 
@@ -523,12 +535,23 @@ export function AuthProvider({ children }) {
       return { data: {}, error: null };
     }
 
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-    const identity = currentUser?.identities?.find(i => i.id === identityId || i.provider === identityId);
-    if (!identity) {
-      return { error: new Error('Identity not found') };
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const identity = currentUser?.identities?.find(i => i.id === identityId || i.provider === identityId);
+      if (!identity) {
+        return { error: new Error('Identity not found') };
+      }
+      const res = await supabase.auth.unlinkIdentity(identity);
+      if (!res.error) {
+        setUser((prev) => (prev ? {
+          ...prev,
+          identities: (prev.identities || []).filter(i => i.id !== identity.id && i.provider !== identity.provider),
+        } : null));
+      }
+      return res;
+    } catch (err) {
+      return { error: err };
     }
-    return await supabase.auth.unlinkIdentity(identity);
   };
 
   const exportUserData = async () => {

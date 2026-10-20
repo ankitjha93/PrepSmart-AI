@@ -222,7 +222,17 @@ export default function AccountSettingsDialog({ open, onOpenChange }) {
     try {
       const res = await linkIdentity({ provider });
       if (res?.error) {
-        toast.error(`Could not link ${provider}: ${res.error.message}`);
+        const msg = res.error.message || '';
+        if (msg.includes('provider is not enabled') || msg.includes('validation_failed')) {
+          toast.error(
+            `${provider === 'google' ? 'Google' : 'GitHub'} OAuth is not enabled in your Supabase dashboard yet. Add your Client ID & Secret in Supabase Auth Providers.`
+          );
+        } else {
+          toast.error(`Could not link ${provider}: ${res.error.message}`);
+        }
+      } else if (res?.data?.url && typeof window !== 'undefined') {
+        // Redirect browser to OAuth consent screen for Google or GitHub
+        window.location.href = res.data.url;
       } else {
         toast.success(`${provider.charAt(0).toUpperCase() + provider.slice(1)} account connected!`);
       }
@@ -676,6 +686,7 @@ export default function AccountSettingsDialog({ open, onOpenChange }) {
                     <Button
                       size="sm"
                       variant="outline"
+                      aria-label="Disconnect Google account"
                       onClick={() => handleUnlinkSocial('google', 'Google')}
                       className="text-xs text-slate-600 dark:text-slate-400 rounded-xl"
                     >
@@ -684,6 +695,7 @@ export default function AccountSettingsDialog({ open, onOpenChange }) {
                   ) : (
                     <Button
                       size="sm"
+                      aria-label="Connect Google account"
                       onClick={() => handleLinkSocial('google')}
                       disabled={linkingProvider === 'google'}
                       className="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
@@ -722,6 +734,7 @@ export default function AccountSettingsDialog({ open, onOpenChange }) {
                     <Button
                       size="sm"
                       variant="outline"
+                      aria-label="Disconnect GitHub account"
                       onClick={() => handleUnlinkSocial('github', 'GitHub')}
                       className="text-xs text-slate-600 dark:text-slate-400 rounded-xl"
                     >
@@ -730,6 +743,7 @@ export default function AccountSettingsDialog({ open, onOpenChange }) {
                   ) : (
                     <Button
                       size="sm"
+                      aria-label="Connect GitHub account"
                       onClick={() => handleLinkSocial('github')}
                       disabled={linkingProvider === 'github'}
                       className="text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 rounded-xl"
@@ -737,6 +751,17 @@ export default function AccountSettingsDialog({ open, onOpenChange }) {
                       {linkingProvider === 'github' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Connect'}
                     </Button>
                   )}
+                </div>
+
+                {/* Helpful OAuth Guidance Info Card */}
+                <div className="p-3.5 bg-blue-50/70 dark:bg-blue-950/30 rounded-2xl border border-blue-200/60 dark:border-blue-900/40 text-[11px] text-blue-700 dark:text-blue-300 flex items-start gap-2.5">
+                  <Sparkles className="w-4 h-4 shrink-0 text-blue-500 mt-0.5" />
+                  <div>
+                    <span className="font-bold block">Enterprise OAuth Integration</span>
+                    <span>
+                      Connecting Google or GitHub links your verified identity to your candidate profile for unified 1-click sign-in. In Demo Mode, accounts connect instantly for preview.
+                    </span>
+                  </div>
                 </div>
               </div>
             )}

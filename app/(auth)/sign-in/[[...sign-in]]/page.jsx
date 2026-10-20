@@ -41,7 +41,14 @@ export default function SignInPage() {
   // Sanitize redirectedFrom against open redirects
   const redirectedFrom = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/dashboard';
   const errorParam = searchParams.get('error');
-  const [errorMessage, setErrorMessage] = useState(errorParam || '');
+  const getFriendlyError = (err) => {
+    if (!err) return '';
+    if (err.includes('provider is not enabled') || err.includes('validation_failed')) {
+      return 'The selected OAuth provider is not yet enabled in your Supabase project. Add your OAuth credentials in Supabase Auth Providers, or use the 1-Click Demo button.';
+    }
+    return err;
+  };
+  const [errorMessage, setErrorMessage] = useState(getFriendlyError(errorParam));
 
   // Automatically redirect if already signed in
   useEffect(() => {
@@ -127,8 +134,9 @@ export default function SignInPage() {
     try {
       const { error } = await signInWithOAuth({ provider, redirectTo: redirectedFrom });
       if (error) {
-        toast.error(error.message || `Failed to sign in with ${provider}`);
-        setErrorMessage(error.message || `Failed to sign in with ${provider}`);
+        const msg = error.friendlyMessage || getFriendlyError(error.message) || `Failed to sign in with ${provider}`;
+        toast.error(msg);
+        setErrorMessage(msg);
         setIsLoading(false);
       }
     } catch (err) {

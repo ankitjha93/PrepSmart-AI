@@ -137,7 +137,12 @@ export default function SignUpPage() {
     try {
       const { error } = await signInWithOAuth({ provider, redirectTo: '/dashboard' });
       if (error) {
-        toast.error(error.message || `Failed to sign up with ${provider}`);
+        const msg =
+          error.friendlyMessage ||
+          (error.message?.includes('provider is not enabled') || error.message?.includes('validation_failed')
+            ? `The ${provider.toUpperCase()} provider is not yet enabled in your Supabase project. Add your OAuth credentials in Supabase Auth Providers, or use the 1-Click Demo button.`
+            : error.message || `Failed to sign up with ${provider}`);
+        toast.error(msg);
         setIsLoading(false);
       }
     } catch (err) {
