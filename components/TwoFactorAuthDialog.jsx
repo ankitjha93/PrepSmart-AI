@@ -35,6 +35,7 @@ export default function TwoFactorAuthDialog({ open, onOpenChange }) {
   const [verifying, setVerifying] = useState(false);
   const [backupCodes, setBackupCodes] = useState([]);
   const [backupCopied, setBackupCopied] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -404,6 +405,7 @@ export default function TwoFactorAuthDialog({ open, onOpenChange }) {
                     size="sm"
                     variant="ghost"
                     onClick={copySecret}
+                    aria-label="Copy secret key"
                     className="h-8 px-2 text-xs shrink-0"
                   >
                     {copied ? (

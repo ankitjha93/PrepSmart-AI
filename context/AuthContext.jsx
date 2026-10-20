@@ -98,14 +98,23 @@ export function AuthProvider({ children }) {
     if (!rawUser) return null;
     const isDemo = Boolean(rawUser.id?.startsWith('demo') || rawUser.user_metadata?.is_demo);
     const email = rawUser.email || rawUser.user_metadata?.email || 'user@example.com';
-    const cachedAvatar = !isDemo && typeof window !== 'undefined' ? localStorage.getItem('prepsmart_user_avatar') : null;
     
-    // Choose the best available avatar URL
+    // User-scoped local storage cache for instant rendering
+    const userCachedAvatar = typeof window !== 'undefined' && rawUser.id
+      ? localStorage.getItem(`prepsmart_user_avatar_${rawUser.id}`)
+      : null;
+    const legacyCachedAvatar = !isDemo && typeof window !== 'undefined'
+      ? localStorage.getItem('prepsmart_user_avatar')
+      : null;
+    const cachedAvatar = userCachedAvatar || legacyCachedAvatar;
+
+    // Check raw avatar from user_metadata or imageUrl
     const rawAvatar = rawUser.user_metadata?.avatar_url;
-    const isCleanHttpUrl = rawAvatar && !rawAvatar.startsWith('data:') && !rawAvatar.includes('undefined') && rawAvatar !== 'local';
+    const isValidAvatarString = rawAvatar && rawAvatar !== 'local' && !rawAvatar.includes('undefined');
+
     const avatarUrl =
       cachedAvatar ||
-      (isCleanHttpUrl ? rawAvatar : null) ||
+      (isValidAvatarString ? rawAvatar : null) ||
       rawUser.imageUrl ||
       `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(rawUser.user_metadata?.full_name || email)}&backgroundColor=2563eb,7c3aed,059669,db2777,d97706`;
 
@@ -459,6 +468,9 @@ export function AuthProvider({ children }) {
 
       // 5. Always persist to localStorage cache and broadcast to all tabs
       if (typeof window !== 'undefined') {
+        if (user?.id) {
+          localStorage.setItem(`prepsmart_user_avatar_${user.id}`, finalAvatarUrl);
+        }
         localStorage.setItem('prepsmart_user_avatar', finalAvatarUrl);
         localStorage.setItem('prepsmart_auth_sync', `avatar-${Date.now()}`);
       }
@@ -600,8 +612,13 @@ export function AuthProvider({ children }) {
 
   const signOut = async () => {
     if (typeof window !== 'undefined') {
+      if (user?.id) {
+        localStorage.removeItem(`prepsmart_user_avatar_${user.id}`);
+      }
       localStorage.removeItem('prepsmart_demo_user');
       localStorage.removeItem('prepsmart_user_avatar');
+      localStorage.removeItem('prepsmart_demo_mfa_factors');
+      localStorage.removeItem('prepsmart_mfa_backup_codes');
       localStorage.setItem('prepsmart_auth_sync', `signout-${Date.now()}`);
       document.cookie = 'prepsmart_demo_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'prepsmart_user_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -637,8 +654,13 @@ export function AuthProvider({ children }) {
 
   const signOutGlobal = async () => {
     if (typeof window !== 'undefined') {
+      if (user?.id) {
+        localStorage.removeItem(`prepsmart_user_avatar_${user.id}`);
+      }
       localStorage.removeItem('prepsmart_demo_user');
       localStorage.removeItem('prepsmart_user_avatar');
+      localStorage.removeItem('prepsmart_demo_mfa_factors');
+      localStorage.removeItem('prepsmart_mfa_backup_codes');
       localStorage.setItem('prepsmart_auth_sync', `signout-${Date.now()}`);
       document.cookie = 'prepsmart_demo_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'prepsmart_user_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -659,22 +681,29 @@ export function AuthProvider({ children }) {
   };
 
   const getMfaFactors = async () => {
-    if (!isConfigured || !supabase?.auth?.mfa) {
-      return { data: { all: [], totp: [] }, error: null };
+    if (!isConfigured || !supabase?.auth?.mfa || isDemoUser) {
+      let factors = [];
+      if (typeof window !== 'undefined') {
+        try {
+          const stored = localStorage.getItem('prepsmart_demo_mfa_factors');
+          if (stored) factors = JSON.parse(stored);
+        } catch {}
+      }
+      return { data: { all: factors, totp: factors }, error: null };
     }
     return await supabase.auth.mfa.listFactors();
   };
 
   const enrollTotp = async (friendlyName = 'PrepSmart Authenticator') => {
-    if (!isConfigured || !supabase?.auth?.mfa) {
+    if (!isConfigured || !supabase?.auth?.mfa || isDemoUser) {
       return {
         data: {
           id: 'demo-factor-totp',
           type: 'totp',
           totp: {
             secret: 'JBSWY3DPEHPK3PXP',
-            qr_code: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="100%" height="100%" fill="white"/><text x="50%" y="50%" font-size="14" text-anchor="middle" fill="black">Demo Authenticator QR</text></svg>',
-            uri: 'otpauth://totp/PrepSmart:user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=PrepSmart'
+            qr_code: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="100%" height="100%" fill="white"/><text x="50%" y="45%" font-size="12" font-family="sans-serif" font-weight="bold" text-anchor="middle" fill="#2563eb">PrepSmart AI</text><text x="50%" y="60%" font-size="10" font-family="monospace" text-anchor="middle" fill="#64748b">JBSWY3DPEHPK3PXP</text></svg>',
+            uri: 'otpauth://totp/PrepSmart:candidate@prepsmart.ai?secret=JBSWY3DPEHPK3PXP&issuer=PrepSmart'
           }
         },
         error: null
@@ -687,7 +716,17 @@ export function AuthProvider({ children }) {
   };
 
   const verifyTotp = async (factorId, code) => {
-    if (!isConfigured || !supabase?.auth?.mfa) {
+    if (!isConfigured || !supabase?.auth?.mfa || isDemoUser) {
+      if (typeof window !== 'undefined') {
+        const factor = {
+          id: factorId || 'demo-factor-totp',
+          factor_type: 'totp',
+          friendly_name: 'PrepSmart Authenticator',
+          status: 'verified',
+          created_at: new Date().toISOString()
+        };
+        localStorage.setItem('prepsmart_demo_mfa_factors', JSON.stringify([factor]));
+      }
       return { data: { verified: true }, error: null };
     }
     const challengeRes = await supabase.auth.mfa.challenge({ factorId });
@@ -700,7 +739,10 @@ export function AuthProvider({ children }) {
   };
 
   const unenrollTotp = async (factorId) => {
-    if (!isConfigured || !supabase?.auth?.mfa) {
+    if (!isConfigured || !supabase?.auth?.mfa || isDemoUser) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('prepsmart_demo_mfa_factors');
+      }
       return { data: { id: factorId }, error: null };
     }
     return await supabase.auth.mfa.unenroll({ factorId });

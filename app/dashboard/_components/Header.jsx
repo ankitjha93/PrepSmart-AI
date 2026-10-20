@@ -440,7 +440,7 @@ function Header() {
                 >
                   <Avatar className="w-8 h-8 group-hover:scale-105 transition-transform">
                     <AvatarImage 
-                      src={user.imageUrl || (!isDemoUser && typeof window !== 'undefined' ? localStorage.getItem('prepsmart_user_avatar') : null)} 
+                      src={user.imageUrl || (typeof window !== 'undefined' && user?.id ? (localStorage.getItem(`prepsmart_user_avatar_${user.id}`) || localStorage.getItem('prepsmart_user_avatar')) : null)} 
                       alt={user.fullName || "User"} 
                     />
                     <AvatarFallback>{userInitial}</AvatarFallback>

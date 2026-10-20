@@ -64,9 +64,9 @@ export default function AccountSettingsDialog({ open, onOpenChange }) {
   // Profile & Avatar state
   const [fullName, setFullName] = useState(user?.fullName || '');
   const [previewAvatar, setPreviewAvatar] = useState(() => {
-    const isDemo = Boolean(user?.id?.startsWith('demo') || user?.user_metadata?.is_demo);
-    if (!isDemo && typeof window !== 'undefined') {
-      return localStorage.getItem('prepsmart_user_avatar') || user?.imageUrl || null;
+    if (typeof window !== 'undefined' && user?.id) {
+      const stored = localStorage.getItem(`prepsmart_user_avatar_${user.id}`) || localStorage.getItem('prepsmart_user_avatar');
+      if (stored) return stored;
     }
     return user?.imageUrl || null;
   });
@@ -75,10 +75,17 @@ export default function AccountSettingsDialog({ open, onOpenChange }) {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && user?.id) {
+      const stored = localStorage.getItem(`prepsmart_user_avatar_${user.id}`) || localStorage.getItem('prepsmart_user_avatar');
+      if (stored) {
+        setPreviewAvatar(stored);
+        return;
+      }
+    }
     if (user?.imageUrl) {
       setPreviewAvatar(user.imageUrl);
     }
-  }, [user?.imageUrl]);
+  }, [user?.imageUrl, user?.id]);
 
   // Password state
   const [newPassword, setNewPassword] = useState('');
