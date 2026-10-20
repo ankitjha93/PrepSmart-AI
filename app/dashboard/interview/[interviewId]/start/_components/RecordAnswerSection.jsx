@@ -910,23 +910,24 @@ function RecordAnswerSection({
         />
 
         {/* HUD Overlay: Live Feed Status (Top-Left) */}
-        <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white text-[11px] font-bold">
+        <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-20 flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white text-[10px] sm:text-[11px] font-bold">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
           <span className="text-red-400 font-black">STUDIO CAM</span>
-          <span className="text-white/40">•</span>
-          <span>1080p 30fps</span>
+          <span className="text-white/40 hidden sm:inline">•</span>
+          <span className="hidden sm:inline">1080p 30fps</span>
         </div>
 
         {/* HUD Overlay: Transcriber Armed (Top-Right) */}
-        <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600/70 backdrop-blur-md border border-blue-400/30 text-white text-[11px] font-bold shadow-lg">
+        <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-20 flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-blue-600/70 backdrop-blur-md border border-blue-400/30 text-white text-[10px] sm:text-[11px] font-bold shadow-lg">
           <BrainCircuit className="w-3.5 h-3.5 text-blue-200" />
-          <span>Ollama AI Evaluator Armed</span>
+          <span className="hidden sm:inline">Ollama AI Evaluator Armed</span>
+          <span className="sm:hidden">Ollama Armed</span>
         </div>
 
         {/* FLOATING REAL-TIME AUDIO EQUALIZER DOCK (Bottom Center) */}
-        <div className="absolute bottom-5 z-20 w-[92%] max-w-md mx-auto">
+        <div className="absolute bottom-3 sm:bottom-5 z-20 w-[94%] sm:w-[92%] max-w-md mx-auto">
           {isRecording ? (
-            <div className="backdrop-blur-xl bg-black/80 border border-white/20 rounded-2xl px-4 py-3 shadow-2xl flex flex-col items-center gap-2 transition-all duration-300">
+            <div className="backdrop-blur-xl bg-black/80 border border-white/20 rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-2xl flex flex-col items-center gap-2 transition-all duration-300">
               
               {/* Audio Status Header */}
               <div className="flex items-center justify-between w-full px-1">

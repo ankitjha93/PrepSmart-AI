@@ -122,7 +122,7 @@ function Interview({ params }) {
   }, [interviewData?.jsonMockResp]);
 
   return (
-    <div ref={containerRef} className="max-w-6xl mx-auto py-8 px-4 md:px-8 space-y-8">
+    <div ref={containerRef} className="max-w-6xl mx-auto py-6 sm:py-8 px-3 sm:px-6 md:px-8 space-y-6 sm:space-y-8">
       
       {/* TOP BREADCRUMB & HEADER */}
       <div className="interview-setup-anim flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-slate-800">
@@ -139,8 +139,8 @@ function Interview({ params }) {
             <span className="text-slate-900 dark:text-white font-bold">Calibration & Setup</span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
               Pre-Interview Hardware & AI Calibration
             </h1>
             <Badge variant="gradient" className="text-[10px] font-black uppercase tracking-wider hidden sm:inline-flex px-2.5 py-0.5">

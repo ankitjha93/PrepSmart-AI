@@ -214,55 +214,55 @@ function StartInterview({ params }) {
   const progressPercent = Math.min(100, Math.round(((activeQuestionIndex + 1) / totalQuestions) * 100));
 
   return (
-    <div ref={studioRef} className="max-w-7xl mx-auto py-6 px-4 md:px-8 space-y-6">
+    <div ref={studioRef} className="max-w-7xl mx-auto py-4 sm:py-6 px-3 sm:px-6 md:px-8 space-y-4 sm:space-y-6">
       
       {/* TOP STUDIO TELEMETRY HEADER */}
-      <div className="interview-studio-anim p-4 md:p-5 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-lg space-y-3">
+      <div className="interview-studio-anim p-3.5 sm:p-5 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-lg space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           
           {/* Left: Role Info & Breadcrumb */}
           <div className="flex items-center gap-3">
             <Link 
               href={`/dashboard/interview/${params.interviewId}`}
-              className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors"
+              className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors shrink-0"
               title="Return to Calibration"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
 
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base md:text-lg font-black text-slate-900 dark:text-white tracking-tight truncate max-w-xs md:max-w-md">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white tracking-tight truncate max-w-xs md:max-w-md">
                   {interviewData?.jobPosition || "Technical Mock Interview"}
                 </h1>
                 <Badge variant="gradient" className="text-[9px] font-black uppercase px-2 py-0.5">
                   Live Round
                 </Badge>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+              <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
                 {interviewData?.jobExperience || "3"} Years Seniority • Evaluated by Ollama AI
               </p>
             </div>
           </div>
 
           {/* Right: Live Telemetry Badges (Timer, Progress, Recording indicator) */}
-          <div className="flex items-center flex-wrap gap-2.5">
+          <div className="flex items-center flex-wrap gap-2 sm:gap-2.5">
             {/* Live Indicator */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-black">
+            <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-[11px] sm:text-xs font-black">
               <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-              <span>LIVE INTERVIEW</span>
+              <span>LIVE</span>
             </div>
 
             {/* Session Timer */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold font-mono">
+            <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-[11px] sm:text-xs font-bold font-mono">
               <Clock className="w-3.5 h-3.5 text-blue-500" />
               <span>{formattedTime}</span>
             </div>
 
             {/* Question Progress Pill */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs font-black">
+            <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-[11px] sm:text-xs font-black">
               <Layers className="w-3.5 h-3.5" />
-              <span>Question {activeQuestionIndex + 1} of {totalQuestions}</span>
+              <span>Q {activeQuestionIndex + 1} of {totalQuestions}</span>
             </div>
           </div>
         </div>
@@ -303,7 +303,7 @@ function StartInterview({ params }) {
       </div>
 
       {/* BOTTOM ACTION DOCK */}
-      <div className="interview-studio-anim p-4 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-lg flex items-center justify-between gap-4">
+      <div className="interview-studio-anim p-3.5 sm:p-4 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-lg flex items-center justify-between gap-2.5 sm:gap-4">
         
         {/* Previous Question Button */}
         <Button
@@ -311,7 +311,7 @@ function StartInterview({ params }) {
           variant="outline"
           disabled={activeQuestionIndex === 0}
           onClick={() => setActiveQuestionIndex((prev) => Math.max(0, prev - 1))}
-          className="rounded-2xl px-5 h-11 text-xs font-bold border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 flex items-center gap-2 cursor-pointer"
+          className="rounded-2xl px-3 sm:px-5 h-10 sm:h-11 text-xs font-bold border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 flex items-center gap-1.5 sm:gap-2 cursor-pointer"
         >
           <ChevronLeft className="w-4 h-4" />
           <span className="hidden sm:inline">Previous Question</span>
@@ -332,7 +332,7 @@ function StartInterview({ params }) {
             onClick={() => setActiveQuestionIndex((prev) => prev + 1)}
             onMouseMove={handleMagneticMove}
             onMouseLeave={handleMagneticLeave}
-            className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-600 text-white font-black text-xs md:text-sm px-6 h-11 rounded-2xl shadow-lg shadow-blue-500/25 flex items-center gap-2 group cursor-pointer transition-all duration-300"
+            className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-600 text-white font-black text-xs md:text-sm px-4 sm:px-6 h-10 sm:h-11 rounded-2xl shadow-lg shadow-blue-500/25 flex items-center gap-1.5 sm:gap-2 group cursor-pointer transition-all duration-300"
           >
             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
             <span>Next Question</span>
@@ -343,11 +343,12 @@ function StartInterview({ params }) {
             <Button
               onMouseMove={handleMagneticMove}
               onMouseLeave={handleMagneticLeave}
-              className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-600 text-white font-black text-xs md:text-sm px-6 h-11 rounded-2xl shadow-xl shadow-emerald-500/30 flex items-center gap-2 group cursor-pointer transition-all duration-300 hover:shadow-emerald-500/50"
+              className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-600 text-white font-black text-xs md:text-sm px-4 sm:px-6 h-10 sm:h-11 rounded-2xl shadow-xl shadow-emerald-500/30 flex items-center gap-1.5 sm:gap-2 group cursor-pointer transition-all duration-300 hover:shadow-emerald-500/50"
             >
               <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
-              <Award className="w-4 h-4 text-emerald-200" />
-              <span>Complete Interview & View Report</span>
+              <Award className="w-4 h-4 text-emerald-200 shrink-0" />
+              <span className="hidden sm:inline">Complete Interview & View Report</span>
+              <span className="sm:hidden">Finish & View Report</span>
             </Button>
           </Link>
         )}

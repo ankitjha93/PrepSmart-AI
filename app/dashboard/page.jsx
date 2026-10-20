@@ -394,13 +394,13 @@ function Dashboard() {
   ];
 
   return (
-    <div ref={dashRef} className='p-6 md:p-10 max-w-7xl mx-auto space-y-8'>
+    <div ref={dashRef} className='p-4 sm:p-6 md:p-10 max-w-7xl mx-auto space-y-6 sm:space-y-8'>
       <CandidateOnboardingDialog />
       
       {/* ========================================================================= */}
       {/* 1. HERO CANDIDATE WELCOME COCKPIT                                        */}
       {/* ========================================================================= */}
-      <div className='dash-header relative rounded-3xl p-7 md:p-8 border border-slate-200/90 dark:border-slate-800 bg-gradient-to-br from-white/95 via-blue-50/40 to-indigo-50/30 dark:from-slate-900/95 dark:via-slate-900/80 dark:to-blue-950/20 backdrop-blur-xl shadow-xl overflow-hidden'>
+      <div className='dash-header relative rounded-3xl p-5 sm:p-7 md:p-8 border border-slate-200/90 dark:border-slate-800 bg-gradient-to-br from-white/95 via-blue-50/40 to-indigo-50/30 dark:from-slate-900/95 dark:via-slate-900/80 dark:to-blue-950/20 backdrop-blur-xl shadow-xl overflow-hidden'>
         
         {/* Subtle Ambient Radial Lighting */}
         <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
@@ -408,7 +408,7 @@ function Dashboard() {
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center gap-2.5 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               <Badge variant="blue" className="text-xs font-black uppercase tracking-wider px-3 py-1 shadow-sm flex items-center gap-1.5">
                 <span className={`w-2 h-2 rounded-full ${ollamaStatus.online ? 'bg-emerald-400 animate-pulse' : 'bg-blue-400'}`} />
                 Ollama {modelDisplay} Active
@@ -418,30 +418,30 @@ function Dashboard() {
               </Badge>
             </div>
 
-            <h1 className='font-black text-3xl md:text-4xl text-slate-900 dark:text-white tracking-tight leading-tight'>
+            <h1 className='font-black text-2xl sm:text-3xl md:text-4xl text-slate-900 dark:text-white tracking-tight leading-tight'>
               Welcome back, <span className="text-blue-600 dark:text-blue-400">{userName}</span> 👋
             </h1>
 
-            <p className='text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed'>
+            <p className='text-slate-600 dark:text-slate-300 text-xs sm:text-sm md:text-base leading-relaxed'>
               Your role-specific AI interview cockpit is ready. Practice real-time technical questions, speak your responses with instant STT, and benchmark yourself against FAANG hiring rubrics.
             </p>
           </div>
 
           {/* Action CTAs */}
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3 shrink-0 w-full lg:w-auto">
             <button
               type="button"
               onClick={handleQuickTrack}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs md:text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:scale-[1.02] active:scale-95 cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl text-xs md:text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:scale-[1.02] active:scale-95 cursor-pointer w-full sm:w-auto"
             >
               <Rocket className="w-4 h-4" />
               <span>Start New Mock</span>
             </button>
 
-            <Link href="/dashboard/resume-scanner">
+            <Link href="/dashboard/resume-scanner" className="w-full sm:w-auto">
               <button
                 type="button"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs md:text-sm font-bold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-md shadow-purple-500/20 transition-all duration-200 hover:scale-[1.02] active:scale-95 cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-xs md:text-sm font-bold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-md shadow-purple-500/20 transition-all duration-200 hover:scale-[1.02] active:scale-95 cursor-pointer w-full"
               >
                 <FileText className="w-4 h-4" />
                 <span>Tailor with Resume</span>
@@ -451,7 +451,7 @@ function Dashboard() {
             <button
               type="button"
               onClick={() => window.dispatchEvent(new CustomEvent('prepsmart_open_onboarding'))}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs md:text-sm font-bold border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-95 group cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-xs md:text-sm font-bold border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-95 group cursor-pointer w-full sm:w-auto"
             >
               <Sliders className="w-4 h-4 text-blue-600 dark:text-blue-400 group-hover:rotate-45 transition-transform" />
               <span>Calibrate Persona</span>

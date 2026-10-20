@@ -305,7 +305,7 @@ function QuestionsSection({
   return (
     <div 
       ref={questionBoxRef} 
-      className="p-6 md:p-8 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl shadow-xl flex flex-col justify-between space-y-6 relative overflow-hidden transition-all duration-300"
+      className="p-4 sm:p-6 md:p-8 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl shadow-xl flex flex-col justify-between space-y-5 sm:space-y-6 relative overflow-hidden transition-all duration-300"
     >
       {/* Ambient gradient aura */}
       <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-blue-500/15 via-indigo-500/5 to-transparent pointer-events-none rounded-full blur-2xl" />
@@ -330,7 +330,7 @@ function QuestionsSection({
         </div>
 
         {/* INTERACTIVE QUESTION STEPPER PILLS */}
-        <div className="flex flex-wrap items-center gap-2 mb-6">
+        <div className="flex flex-wrap sm:flex-nowrap sm:overflow-x-auto no-scrollbar items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 pb-1 sm:pb-0">
           {mockInterviewQuestion.map((_, index) => {
             const isActive = activeQuestionIndex === index;
             const isAnswered = answeredIndices.has(index);
@@ -340,7 +340,7 @@ function QuestionsSection({
                 key={index}
                 type="button"
                 onClick={() => setActiveQuestionIndex && setActiveQuestionIndex(index)}
-                className={`relative px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-300 flex items-center gap-1.5 cursor-pointer ${
+                className={`relative px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all duration-300 flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                   isActive
                     ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30 scale-105 ring-2 ring-blue-500/40 ring-offset-1 dark:ring-offset-slate-900'
                     : isAnswered

@@ -380,7 +380,7 @@ export default function Home() {
       {/* ========================================================================= */}
       {/* HERO SECTION                                                             */}
       {/* ========================================================================= */}
-      <section className="relative pt-10 pb-16 px-6 max-w-6xl mx-auto text-center z-10">
+      <section className="relative pt-8 sm:pt-10 pb-12 sm:pb-16 px-4 sm:px-6 max-w-6xl mx-auto text-center z-10">
         
         {/* Top Floating Pill Badge with Live Ollama Beacon */}
         <div className="hero-badge inline-flex items-center gap-2 mb-4 cursor-default flex-wrap justify-center">
@@ -394,12 +394,12 @@ export default function Home() {
         </div>
 
         {/* Live Tech Market Momentum Ticker */}
-        <div className="market-ticker max-w-4xl mx-auto mb-6 p-2 px-4 rounded-2xl bg-white/70 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 shadow-sm backdrop-blur-md flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="market-ticker max-w-4xl mx-auto mb-6 p-2.5 px-4 rounded-2xl bg-white/70 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 shadow-sm backdrop-blur-md flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2">
             <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
             <span className="font-bold text-slate-800 dark:text-slate-200">Tech Hiring Momentum (Live):</span>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <span className="text-slate-600 dark:text-slate-300">
               <strong className="text-blue-600 dark:text-blue-400">AI / ML:</strong> $165k-$225k <span className="text-emerald-500 font-bold">+54% YoY</span>
             </span>
@@ -415,7 +415,7 @@ export default function Home() {
         </div>
 
         {/* Hero Title with Dynamic Gradient */}
-        <h1 className="hero-title text-4xl sm:text-5xl md:text-7xl font-black tracking-tight text-[#0F172A] dark:text-white leading-[1.08] mb-6">
+        <h1 className="hero-title text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-[#0F172A] dark:text-white leading-[1.1] mb-6 break-words">
           Ace Your Next Interview with{" "}
           <span className="hero-gradient-text animate-gradient-shift inline-block drop-shadow-sm">
             Adaptive AI
@@ -423,7 +423,7 @@ export default function Home() {
         </h1>
 
         {/* Subtitle */}
-        <p className="hero-desc text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed font-normal">
+        <p className="hero-desc text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto mb-8 sm:mb-10 leading-relaxed font-normal">
           Practice role-tailored technical & behavioral mock sessions, speak naturally with live audio spectrum feedback, and receive instantaneous FAANG-calibrated AI evaluations.
         </p>
 

@@ -68,8 +68,8 @@ export default function FeatureMatrix() {
         </p>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs border-collapse">
+      <div className="overflow-x-auto no-scrollbar -mx-2 sm:mx-0">
+        <table className="w-full min-w-[580px] text-left text-xs border-collapse">
           <thead>
             <tr className="border-b border-slate-200 dark:border-slate-800">
               <th className="py-4 px-4 font-bold text-slate-500 uppercase tracking-wider w-2/5">

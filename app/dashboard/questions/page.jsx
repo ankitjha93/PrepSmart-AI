@@ -182,7 +182,7 @@ export default function QuestionsCockpitPage() {
   };
 
   return (
-    <div className="py-6 md:py-10 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-300">
+    <div className="py-6 md:py-10 max-w-7xl mx-auto px-3 sm:px-6 space-y-6 sm:space-y-8 animate-in fade-in duration-300">
       {/* =================================================================== */}
       {/* COCKPIT HEADER & TELEMETRY STRIP                                    */}
       {/* =================================================================== */}

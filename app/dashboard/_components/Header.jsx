@@ -281,12 +281,12 @@ function Header() {
   return (
     <header 
       ref={headerRef} 
-      className={`sticky top-0 z-50 w-full px-3 sm:px-6 transition-all duration-300 ${
-        isScrolled ? 'pt-2 pb-2' : 'pt-3 pb-3'
+      className={`sticky top-0 z-50 w-full px-2 sm:px-6 transition-all duration-300 ${
+        isScrolled ? 'pt-2 pb-2' : 'pt-2.5 pb-2.5 sm:pt-3 sm:pb-3'
       }`}
     >
       <div 
-        className={`max-w-7xl mx-auto rounded-2xl md:rounded-full backdrop-blur-2xl transition-all duration-300 border px-4 sm:px-6 py-2.5 flex items-center justify-between ${
+        className={`max-w-7xl mx-auto rounded-2xl md:rounded-full backdrop-blur-2xl transition-all duration-300 border px-3 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between ${
           isScrolled 
             ? 'bg-white/95 dark:bg-[#0F172A]/95 border-slate-200/90 dark:border-slate-800 shadow-xl shadow-blue-500/5' 
             : 'bg-white/85 dark:bg-[#0F172A]/85 border-slate-200/70 dark:border-slate-800/80 shadow-lg shadow-slate-900/5'
@@ -299,7 +299,7 @@ function Header() {
           href="/" 
           onMouseEnter={handleBrandEnter}
           onMouseLeave={handleBrandLeave}
-          className="nav-brand flex items-center gap-3 group cursor-pointer shrink-0"
+          className="nav-brand flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0"
         >
           <div className="relative">
             {/* Luminous aura behind logo */}
@@ -308,20 +308,20 @@ function Header() {
             <div className="brand-logo-img relative p-1 rounded-2xl bg-slate-900/5 dark:bg-white/5 border border-slate-200/80 dark:border-slate-800 shadow-sm transition-all duration-300">
               <Image 
                 src="/logo.png" 
-                width={38} 
-                height={38} 
+                width={36} 
+                height={36} 
                 alt="PrepSmart AI 3D Logo" 
                 priority 
-                className="rounded-xl drop-shadow-sm"
+                className="rounded-xl drop-shadow-sm w-8 h-8 sm:w-9 sm:h-9"
               />
             </div>
             {/* Pulsing online status indicator */}
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full animate-pulse" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full animate-pulse" />
           </div>
 
           <div className="flex flex-col">
-            <div className="flex items-center gap-1.5">
-              <span className="flex items-center text-xl tracking-tight">
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <span className="flex items-center text-lg sm:text-xl tracking-tight">
                 <span className="brand-prep-text bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 bg-clip-text text-transparent font-black">
                   Prep
                 </span>
@@ -331,7 +331,7 @@ function Header() {
               </span>
               <Badge 
                 variant="gradient" 
-                className="brand-badge text-[10px] font-black uppercase px-2 py-0.5 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/20 border-none"
+                className="brand-badge text-[9px] sm:text-[10px] font-black uppercase px-1.5 sm:px-2 py-0.5 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/20 border-none"
               >
                 AI
               </Badge>
@@ -590,7 +590,7 @@ function Header() {
       {/* MOBILE DRAWER MENU                                                  */}
       {/* =================================================================== */}
       {mobileMenuOpen && (
-        <div className="lg:hidden mt-2 p-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="lg:hidden mt-2 p-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 max-h-[calc(100vh-80px)] overflow-y-auto no-scrollbar">
           <ul className="space-y-1 pb-3 border-b border-slate-100 dark:border-slate-800">
             {navLinks.map((item) => {
               const isActive = path === item.href;

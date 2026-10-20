@@ -317,25 +317,25 @@ function Feedback({ params }) {
   const VerdictIcon = verdict.icon;
 
   return (
-    <div ref={containerRef} className="max-w-6xl mx-auto py-8 px-4 md:px-8 space-y-8">
+    <div ref={containerRef} className="max-w-6xl mx-auto py-6 sm:py-8 px-3 sm:px-6 md:px-8 space-y-6 sm:space-y-8">
       
       {/* EMPTY STATE */}
       {!loading && feedbackList?.length === 0 ? (
-        <div className="report-stagger-item text-center py-20 px-6 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-xl max-w-xl mx-auto space-y-5">
+        <div className="report-stagger-item text-center py-16 sm:py-20 px-4 sm:px-6 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-xl max-w-xl mx-auto space-y-5">
           <div className="w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-inner">
             <AlertCircle className="w-8 h-8" />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               No Interview Feedback Found
             </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-sm mx-auto">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-sm mx-auto">
               You haven't recorded any answers for this mock session yet. Complete the interview questions to generate your performance report.
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Link href={`/dashboard/interview/${params.interviewId}/start`}>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl px-6 h-11 flex items-center gap-2 shadow-md">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 w-full sm:w-auto">
+            <Link href={`/dashboard/interview/${params.interviewId}/start`} className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl px-6 h-11 flex items-center justify-center gap-2 shadow-md">
                 <RotateCcw className="w-4 h-4" />
                 <span>Start Interview Round</span>
               </Button>
@@ -343,7 +343,7 @@ function Feedback({ params }) {
             <Button
               variant="outline"
               onClick={() => router.replace('/dashboard')}
-              className="rounded-xl px-5 h-11 border-slate-200 dark:border-slate-800"
+              className="w-full sm:w-auto rounded-xl px-5 h-11 border-slate-200 dark:border-slate-800"
             >
               Return to Dashboard
             </Button>
@@ -352,12 +352,12 @@ function Feedback({ params }) {
       ) : (
         <>
           {/* TOP SESSION TELEMETRY & HERO HEADER */}
-          <div className="report-stagger-item p-6 md:p-8 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-xl space-y-5">
+          <div className="report-stagger-item p-4 sm:p-6 md:p-8 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-xl space-y-4 sm:space-y-5">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               
               {/* Left: Role Info & Badges */}
               <div className="space-y-2">
-                <div className="flex items-center gap-2.5 flex-wrap">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Link
                     href="/dashboard"
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
@@ -375,7 +375,7 @@ function Feedback({ params }) {
                   </Badge>
                 </div>
 
-                <h1 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+                <h1 className="text-xl sm:text-2xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
                   Performance & Feedback Report
                 </h1>
                 

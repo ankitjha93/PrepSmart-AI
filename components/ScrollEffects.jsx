@@ -107,7 +107,7 @@ export default function ScrollEffects() {
 
       {/* 2. FLOATING GLASSMORPHIC BACK-TO-TOP CAPSULE WITH LIVE METRIC HUD */}
       <div
-        className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${
+        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 transition-all duration-300 ${
           showBackToTop
             ? "opacity-100 translate-y-0 pointer-events-auto"
             : "opacity-0 translate-y-6 pointer-events-none"
@@ -115,7 +115,7 @@ export default function ScrollEffects() {
       >
         {/* Floating companion tooltip on hover */}
         <div
-          className={`absolute bottom-full right-0 mb-2.5 px-3 py-1 rounded-lg bg-slate-900/90 dark:bg-slate-950/90 text-white text-xs font-medium tracking-wide shadow-xl border border-white/10 backdrop-blur-md flex items-center gap-1.5 whitespace-nowrap transition-all duration-200 pointer-events-none ${
+          className={`absolute bottom-full right-0 mb-2.5 px-3 py-1 rounded-lg bg-slate-900/90 dark:bg-slate-950/90 text-white text-xs font-medium tracking-wide shadow-xl border border-white/10 backdrop-blur-md hidden sm:flex items-center gap-1.5 whitespace-nowrap transition-all duration-200 pointer-events-none ${
             isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"
           }`}
         >
@@ -129,10 +129,10 @@ export default function ScrollEffects() {
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           aria-label={`Scroll back to top (${roundedProgress}% scrolled)`}
-          className="relative w-13 h-13 w-[52px] h-[52px] rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800 shadow-xl flex items-center justify-center group cursor-pointer overflow-hidden transition-colors"
+          className="relative w-11 h-11 sm:w-[52px] sm:h-[52px] rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800 shadow-xl flex items-center justify-center group cursor-pointer overflow-hidden transition-colors"
         >
           {/* Circular SVG Progress Ring */}
-          <svg className="w-[52px] h-[52px] -rotate-90 absolute inset-0 pointer-events-none" viewBox="0 0 48 48">
+          <svg className="w-11 h-11 sm:w-[52px] sm:h-[52px] -rotate-90 absolute inset-0 pointer-events-none" viewBox="0 0 48 48">
             <circle
               cx="24"
               cy="24"
