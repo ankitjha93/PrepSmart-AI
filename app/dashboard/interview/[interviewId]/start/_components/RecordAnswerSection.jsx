@@ -6,6 +6,7 @@ import Image from 'next/image';
 import React, { useEffect, useState, useRef } from 'react';
 import Webcam from 'react-webcam';
 import gsap from 'gsap';
+import FaceDetectionHUD from '@/components/FaceDetectionHUD';
 import { 
   Mic, 
   StopCircle, 
@@ -59,6 +60,7 @@ function RecordAnswerSection({
   const [audioDevices, setAudioDevices] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState('');
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const webcamRef = useRef(null);
   const [speechError, setSpeechError] = useState(null);
   const [selectedLang, setSelectedLang] = useState('en-US');
   const [speechSupported, setSpeechSupported] = useState(true);
@@ -894,9 +896,17 @@ function RecordAnswerSection({
 
         {/* Live Mirrored Webcam Feed */}
         <Webcam
+          ref={webcamRef}
           audio={false}
           mirrored={true}
           className="w-full h-full object-cover rounded-3xl"
+        />
+
+        {/* Real-Time AI Face Detection, Gaze & Posture HUD */}
+        <FaceDetectionHUD
+          videoRef={webcamRef}
+          isActive={true}
+          showTelemetryDock={!isRecording}
         />
 
         {/* HUD Overlay: Live Feed Status (Top-Left) */}

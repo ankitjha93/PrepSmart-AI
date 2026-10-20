@@ -9,6 +9,7 @@ import { MockInterview } from '@/utils/schema';
 import { eq } from 'drizzle-orm';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import FaceDetectionHUD from '@/components/FaceDetectionHUD';
 import { 
   WebcamIcon, 
   Lightbulb, 
@@ -41,6 +42,7 @@ function Interview({ params }) {
   const [webCamEnabled, setWebCamEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const containerRef = useRef(null);
+  const webcamRef = useRef(null);
 
   useEffect(() => {
     GetInterviewDetails();
@@ -304,16 +306,24 @@ function Interview({ params }) {
               /* LIVE CAMERA FEED */
               <div className="relative w-full h-full">
                 <Webcam
+                  ref={webcamRef}
                   onUserMedia={() => setWebCamEnabled(true)}
                   onUserMediaError={() => setWebCamEnabled(false)}
                   mirrored={true}
                   className="w-full h-full object-cover rounded-3xl"
                 />
 
-                {/* Live Feed HUD Overlay (Top-Left) */}
+                {/* Real-Time AI Face Detection & Gaze Tracking HUD */}
+                <FaceDetectionHUD 
+                  videoRef={webcamRef} 
+                  isActive={webCamEnabled} 
+                  showTelemetryDock={true}
+                />
+
+                {/* Live Feed Status Pill (Top-Left) */}
                 <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white text-[11px] font-bold">
                   <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                  <span className="text-red-400 font-black">LIVE FEED</span>
+                  <span className="text-red-400 font-black">STUDIO CAM</span>
                   <span className="text-white/40">•</span>
                   <span>1080p 30fps</span>
                 </div>
