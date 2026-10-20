@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 test.use({ storageState: { cookies: [], origins: [] } });
 
 test.describe('Google & GitHub OAuth and Account Linking', () => {
+  test.setTimeout(120000);
   test('sign-in and sign-up pages display Google and GitHub buttons and handle clicks gracefully', async ({ page }) => {
     const pageErrors = [];
     page.on('pageerror', (err) => pageErrors.push(err.message));

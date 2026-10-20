@@ -223,7 +223,11 @@ export default function AccountSettingsDialog({ open, onOpenChange }) {
       const res = await linkIdentity({ provider });
       if (res?.error) {
         const msg = res.error.message || '';
-        if (msg.includes('provider is not enabled') || msg.includes('validation_failed')) {
+        if (msg.includes('manual_linking_disabled') || msg.toLowerCase().includes('manual linking is disabled')) {
+          toast.error(
+            'Manual account linking is disabled in your Supabase project. Enable "Allow manual linking" in Supabase Dashboard -> Authentication -> Settings/Providers, or sign in directly via Google/GitHub.'
+          );
+        } else if (msg.includes('provider is not enabled') || msg.includes('validation_failed')) {
           toast.error(
             `${provider === 'google' ? 'Google' : 'GitHub'} OAuth is not enabled in your Supabase dashboard yet. Add your Client ID & Secret in Supabase Auth Providers.`
           );

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 export async function GET(request) {
   const { searchParams, origin } = new URL(request.url);
@@ -29,18 +30,39 @@ export async function GET(request) {
 
   if (code) {
     try {
-      const supabase = createClient();
+      const cookieStore = cookies();
+      let response = NextResponse.redirect(`${baseUrl}${rawNext}`);
+
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        {
+          cookies: {
+            getAll() {
+              return cookieStore.getAll();
+            },
+            setAll(cookiesToSet) {
+              cookiesToSet.forEach(({ name, value, options }) => {
+                cookieStore.set(name, value, options);
+                response.cookies.set(name, value, options);
+              });
+            },
+          },
+        }
+      );
+
       const { data, error } = await supabase.auth.exchangeCodeForSession(code);
       if (!error && data?.session) {
-        const redirectResponse = NextResponse.redirect(`${baseUrl}${rawNext}`);
-        // Ensure user session cookie is attached
-        redirectResponse.cookies.set('prepsmart_user_session', 'true', {
+        response.cookies.set('prepsmart_user_session', 'true', {
           path: '/',
           maxAge: 604800,
           sameSite: 'lax',
         });
-        return redirectResponse;
+        // Clear demo session cookie if real user signs in
+        response.cookies.delete('prepsmart_demo_session');
+        return response;
       }
+
       if (error) {
         console.error('Supabase code exchange error:', error);
         return NextResponse.redirect(
