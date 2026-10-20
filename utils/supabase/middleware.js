@@ -16,8 +16,38 @@ export async function updateSession(request) {
     !anonKey.includes('your-anon-key')
   );
 
-  // If Supabase is unconfigured, allow local demo mode navigation without crashing
+  const demoCookie = request.cookies.get('prepsmart_demo_session');
+  const userSessionCookie = request.cookies.get('prepsmart_user_session');
+  const isDemoActive = demoCookie?.value === 'true' || userSessionCookie?.value === 'true';
+
+  // If Supabase is unconfigured, protect routes based on explicit demo session
   if (!isConfigured) {
+    const isAuthenticated = Boolean(isDemoActive);
+    const pathname = request.nextUrl.pathname;
+    const isProtectedRoute =
+      pathname.startsWith('/dashboard') ||
+      pathname.startsWith('/forum');
+
+    const isAuthRoute =
+      pathname.startsWith('/sign-in') ||
+      pathname.startsWith('/sign-up') ||
+      pathname.startsWith('/forgot-password');
+
+    if (isAuthRoute && isAuthenticated) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = '/dashboard';
+      redirectUrl.searchParams.delete('redirectedFrom');
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    if (isProtectedRoute && !isAuthenticated) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = '/sign-in';
+      const safeTarget = pathname.startsWith('/') && !pathname.startsWith('//') ? pathname : '/dashboard';
+      redirectUrl.searchParams.set('redirectedFrom', safeTarget);
+      return NextResponse.redirect(redirectUrl);
+    }
+
     return supabaseResponse;
   }
 
@@ -49,9 +79,6 @@ export async function updateSession(request) {
   } catch (err) {
     // ignore
   }
-
-  const demoCookie = request.cookies.get('prepsmart_demo_session');
-  const isDemoActive = demoCookie?.value === 'true';
 
   // An entity is only authenticated if Supabase verified the user or demo session is explicitly active
   const isAuthenticated = Boolean(user || isDemoActive);

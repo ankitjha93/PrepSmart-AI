@@ -64,7 +64,8 @@ export default function AccountSettingsDialog({ open, onOpenChange }) {
   // Profile & Avatar state
   const [fullName, setFullName] = useState(user?.fullName || '');
   const [previewAvatar, setPreviewAvatar] = useState(() => {
-    if (typeof window !== 'undefined') {
+    const isDemo = Boolean(user?.id?.startsWith('demo') || user?.user_metadata?.is_demo);
+    if (!isDemo && typeof window !== 'undefined') {
       return localStorage.getItem('prepsmart_user_avatar') || user?.imageUrl || null;
     }
     return user?.imageUrl || null;

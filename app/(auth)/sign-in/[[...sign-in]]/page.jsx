@@ -112,9 +112,10 @@ export default function SignInPage() {
   const handleDemoLogin = async () => {
     setIsLoading(true);
     try {
-      signInDemo();
-      toast.success('Signed in as Demo Candidate (Ankit Jha)! Redirecting...');
-      window.location.href = redirectedFrom;
+      const res = signInDemo();
+      const candidateName = res?.data?.user?.fullName || 'Candidate';
+      toast.success(`Welcome, ${candidateName}! Signed in as Demo Candidate. Redirecting...`);
+      router.push(redirectedFrom);
     } catch (err) {
       toast.error('Demo sign-in failed.');
       setIsLoading(false);

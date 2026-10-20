@@ -52,11 +52,53 @@ export function AuthProvider({ children }) {
     });
   };
 
+  // Helper to generate a realistic, randomized candidate profile for demo sessions
+  const generateDynamicDemoUser = () => {
+    const candidateProfiles = [
+      { firstName: 'Alex', lastName: 'Chen', role: 'Full Stack Engineer' },
+      { firstName: 'Jordan', lastName: 'Taylor', role: 'Software Engineer' },
+      { firstName: 'Taylor', lastName: 'Morgan', role: 'Frontend Specialist' },
+      { firstName: 'Sam', lastName: 'Rivera', role: 'Backend Architect' },
+      { firstName: 'Casey', lastName: 'Kim', role: 'DevOps Specialist' },
+      { firstName: 'Morgan', lastName: 'Brooks', role: 'AI Systems Engineer' },
+      { firstName: 'Riley', lastName: 'Patel', role: 'Cloud Platform Architect' },
+      { firstName: 'Avery', lastName: 'Vance', role: 'Staff Product Engineer' },
+      { firstName: 'Devon', lastName: 'Miller', role: 'Mobile Systems Developer' },
+      { firstName: 'Quinn', lastName: 'Hastings', role: 'Distributed Data Engineer' },
+    ];
+    const picked = candidateProfiles[Math.floor(Math.random() * candidateProfiles.length)];
+    const pin = Math.floor(1000 + Math.random() * 9000);
+    const slug = `${picked.firstName.toLowerCase()}.${picked.lastName.toLowerCase()}${pin}`;
+    const email = `demo.${slug}@prepsmart.ai`;
+    const fullName = `${picked.firstName} ${picked.lastName}`;
+    const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(fullName)}&backgroundColor=2563eb,7c3aed,059669,db2777,d97706`;
+
+    return {
+      id: `demo-${slug}`,
+      email,
+      fullName,
+      imageUrl: avatarUrl,
+      user_metadata: {
+        full_name: fullName,
+        name: fullName,
+        avatar_url: avatarUrl,
+        role: picked.role,
+        is_demo: true,
+      },
+      app_metadata: {
+        provider: 'demo',
+        providers: ['demo'],
+      },
+      created_at: new Date().toISOString(),
+    };
+  };
+
   // Helper to format a user object with Clerk backwards-compatibility
   const formatUser = (rawUser) => {
     if (!rawUser) return null;
+    const isDemo = Boolean(rawUser.id?.startsWith('demo') || rawUser.user_metadata?.is_demo);
     const email = rawUser.email || rawUser.user_metadata?.email || 'user@example.com';
-    const cachedAvatar = typeof window !== 'undefined' ? localStorage.getItem('prepsmart_user_avatar') : null;
+    const cachedAvatar = !isDemo && typeof window !== 'undefined' ? localStorage.getItem('prepsmart_user_avatar') : null;
     
     // Choose the best available avatar URL
     const rawAvatar = rawUser.user_metadata?.avatar_url;
@@ -65,7 +107,7 @@ export function AuthProvider({ children }) {
       cachedAvatar ||
       (isCleanHttpUrl ? rawAvatar : null) ||
       rawUser.imageUrl ||
-      `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(email)}`;
+      `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(rawUser.user_metadata?.full_name || email)}&backgroundColor=2563eb,7c3aed,059669,db2777,d97706`;
 
     return {
       ...rawUser,
@@ -76,6 +118,7 @@ export function AuthProvider({ children }) {
       fullName:
         rawUser.user_metadata?.full_name ||
         rawUser.user_metadata?.name ||
+        rawUser.fullName ||
         email.split('@')[0],
       imageUrl: avatarUrl,
     };
@@ -85,33 +128,40 @@ export function AuthProvider({ children }) {
     let mounted = true;
 
     async function initializeAuth() {
-      // 1. Check if demo user is stored in localStorage AND demo cookie is active
+      // 1. Check if demo session is active via localStorage or cookie
       const hasDemoCookie = typeof document !== 'undefined' && document.cookie.includes('prepsmart_demo_session=true');
       const savedDemo = typeof window !== 'undefined' ? localStorage.getItem('prepsmart_demo_user') : null;
-      if (savedDemo && hasDemoCookie) {
-        try {
-          const parsed = JSON.parse(savedDemo);
-          if (mounted) {
-            setUser(formatUser(parsed));
-            setLoading(false);
+
+      if (hasDemoCookie || savedDemo) {
+        let demoData = null;
+        if (savedDemo) {
+          try {
+            demoData = JSON.parse(savedDemo);
+          } catch {
+            demoData = null;
           }
-          return;
-        } catch {
-          // ignore parse error
         }
-      } else if (typeof localStorage !== 'undefined' && savedDemo && !hasDemoCookie) {
-        localStorage.removeItem('prepsmart_demo_user');
+        if (!demoData) {
+          demoData = generateDynamicDemoUser();
+        }
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('prepsmart_demo_user', JSON.stringify(demoData));
+          if (!hasDemoCookie) {
+            document.cookie = 'prepsmart_demo_session=true; path=/; max-age=604800; SameSite=Lax';
+            document.cookie = 'prepsmart_user_session=true; path=/; max-age=604800; SameSite=Lax';
+          }
+        }
+        if (mounted) {
+          setUser(formatUser(demoData));
+          setLoading(false);
+        }
+        return;
       }
 
       if (!isConfigured) {
-        // Default candidate user in unconfigured mode
-        const defaultDemo = {
-          id: 'demo-user-123',
-          email: '93ankitjha@gmail.com',
-          user_metadata: { full_name: 'Ankit Jha' },
-        };
+        // Unconfigured mode without an explicit demo session defaults to guest state (user = null)
         if (mounted) {
-          setUser(formatUser(defaultDemo));
+          setUser(null);
           setLoading(false);
         }
         return;
@@ -226,19 +276,16 @@ export function AuthProvider({ children }) {
   };
 
   const signInDemo = () => {
-    const demoCandidate = {
-      id: 'demo-ankit-jha',
-      email: '93ankitjha@gmail.com',
-      user_metadata: { full_name: 'Ankit Jha' },
-    };
+    const demoCandidate = generateDynamicDemoUser();
     if (typeof window !== 'undefined') {
       localStorage.setItem('prepsmart_demo_user', JSON.stringify(demoCandidate));
       localStorage.setItem('prepsmart_auth_sync', `signin-${Date.now()}`);
       document.cookie = 'prepsmart_demo_session=true; path=/; max-age=604800; SameSite=Lax';
       document.cookie = 'prepsmart_user_session=true; path=/; max-age=604800; SameSite=Lax';
     }
-    setUser(formatUser(demoCandidate));
-    return { data: { user: demoCandidate }, error: null };
+    const formatted = formatUser(demoCandidate);
+    setUser(formatted);
+    return { data: { user: formatted }, error: null };
   };
 
   const signUp = async ({ email, password, fullName }) => {
@@ -554,6 +601,7 @@ export function AuthProvider({ children }) {
   const signOut = async () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('prepsmart_demo_user');
+      localStorage.removeItem('prepsmart_user_avatar');
       localStorage.setItem('prepsmart_auth_sync', `signout-${Date.now()}`);
       document.cookie = 'prepsmart_demo_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'prepsmart_user_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -590,6 +638,7 @@ export function AuthProvider({ children }) {
   const signOutGlobal = async () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('prepsmart_demo_user');
+      localStorage.removeItem('prepsmart_user_avatar');
       localStorage.setItem('prepsmart_auth_sync', `signout-${Date.now()}`);
       document.cookie = 'prepsmart_demo_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'prepsmart_user_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';

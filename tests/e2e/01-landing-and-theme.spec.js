@@ -19,7 +19,7 @@ test.describe('PrepSmart AI - Landing Page & Theme Suite', () => {
     await expect(heroHeadline).toBeVisible();
 
     // Verify key CTA links or buttons
-    const startCta = page.getByRole('link', { name: /Start Free Interview|Get Started Free/i }).first();
+    const startCta = page.getByRole('link', { name: /Start Practicing Free|Start Free Interview|Get Started Free/i }).first();
     await expect(startCta).toBeVisible();
   });
 
