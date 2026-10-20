@@ -273,6 +273,7 @@ function Header() {
   const navLinks = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Questions', href: '/dashboard/questions', icon: Layers },
+    { name: 'Resume ATS', href: '/dashboard/resume-scanner', icon: FileText, badge: 'AI' },
     { name: 'Upgrade', href: '/dashboard/upgrade', icon: Sparkles, badge: 'PRO' },
     { name: 'How it Works', href: '/dashboard/how-it-works', icon: PlayCircle }
   ];
