@@ -64,7 +64,7 @@ Do NOT include markdown formatting or commentary. Return only the JSON object.`;
 
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 60000);
+      const timeout = setTimeout(() => controller.abort(), 3500);
 
       const ollamaRes = await fetch(`${baseUrl}/api/generate`, {
         method: 'POST',
