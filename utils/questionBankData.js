@@ -1,5 +1,5 @@
 /**
- * PrepSmart AI 2.0 - Curated Question Bank Dataset
+ * PrepSmart AI - Curated Question Bank Dataset
  * Multi-domain interview questions categorized by track, difficulty, and company archetypes.
  */
 

@@ -1044,7 +1044,7 @@ export default function Home() {
       <footer className="border-t border-slate-200 dark:border-slate-800 py-12 px-6 relative z-10 bg-[#F8FAFC]/90 dark:bg-[#0F172A]/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-2">
-            <span className="font-extrabold text-sm text-slate-900 dark:text-white">PrepSmart AI 2.0</span>
+            <span className="font-extrabold text-sm text-slate-900 dark:text-white">PrepSmart AI</span>
             <span>• Adaptive Interview Intelligence</span>
           </div>
 

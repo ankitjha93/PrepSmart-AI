@@ -306,10 +306,10 @@ function Header() {
             
             <div className="brand-logo-img relative p-1 rounded-2xl bg-slate-900/5 dark:bg-white/5 border border-slate-200/80 dark:border-slate-800 shadow-sm transition-all duration-300">
               <Image 
-                src="/logo.svg" 
+                src="/logo.png" 
                 width={38} 
                 height={38} 
-                alt="PrepSmart AI Logo" 
+                alt="PrepSmart AI 3D Logo" 
                 priority 
                 className="rounded-xl drop-shadow-sm"
               />
@@ -332,7 +332,7 @@ function Header() {
                 variant="gradient" 
                 className="brand-badge text-[10px] font-black uppercase px-2 py-0.5 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/20 border-none"
               >
-                AI 2.0
+                AI
               </Badge>
             </div>
             <div className="flex items-center gap-1.5 text-[10px] font-medium text-slate-400 dark:text-slate-500 hidden sm:flex tracking-wide -mt-0.5">

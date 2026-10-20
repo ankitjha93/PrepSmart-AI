@@ -1,5 +1,5 @@
 /**
- * PrepSmart AI 2.0 - Pricing & Plan Data
+ * PrepSmart AI - Pricing & Plan Data
  * Multi-tier career acceleration packages with monthly and annual billing rates.
  */
 

@@ -120,7 +120,7 @@ export default function HowItWorksPage() {
         </div>
 
         <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          How PrepSmart AI 2.0 Works
+          How PrepSmart AI Works
         </h1>
 
         <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
@@ -563,7 +563,7 @@ export default function HowItWorksPage() {
       <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 shadow-xl space-y-6">
         <div className="text-center max-w-xl mx-auto">
           <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-            Why PrepSmart AI 2.0?
+            Why PrepSmart AI?
           </span>
           <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
             Compare Against Alternative Practice Methods
@@ -578,7 +578,7 @@ export default function HowItWorksPage() {
                 <th className="py-3 px-4 font-bold text-slate-400 text-center">Human Coaches</th>
                 <th className="py-3 px-4 font-bold text-slate-400 text-center">Generic ChatGPT</th>
                 <th className="py-3 px-4 font-extrabold text-blue-600 dark:text-blue-400 text-center bg-blue-50/50 dark:bg-blue-950/20 rounded-t-2xl">
-                  PrepSmart AI 2.0
+                  PrepSmart AI
                 </th>
               </tr>
             </thead>

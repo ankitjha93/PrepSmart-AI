@@ -88,14 +88,14 @@ export default function ResetPasswordPage() {
         <div className="flex justify-center">
           <Link href="/" className="inline-flex items-center gap-3 group">
             <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-900 shadow-md p-2.5 border border-slate-200 dark:border-slate-800 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <Image src="/logo.svg" alt="PrepSmart AI Logo" width={34} height={34} />
+              <Image src="/logo.png" alt="PrepSmart AI 3D Logo" width={34} height={34} />
             </div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-2xl tracking-tight text-slate-900 dark:text-white">
                 PrepSmart
               </span>
-              <span className="text-[10px] font-black uppercase tracking-wider text-white bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] px-2 py-0.5 rounded-full shadow-sm">
-                AI 2.0
+              <span className="text-[10px] font-black uppercase tracking-wider text-white bg-gradient-to-r from-violet-600 to-purple-600 px-2 py-0.5 rounded-full shadow-sm">
+                AI
               </span>
             </div>
           </Link>

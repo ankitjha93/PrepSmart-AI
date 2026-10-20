@@ -149,7 +149,7 @@ export default function Upgrade() {
             Ready to Land Your Dream Offer?
           </h2>
           <p className="text-blue-100 text-xs md:text-sm">
-            Join thousands of software engineers practicing with PrepSmart AI 2.0. Start free or upgrade for unlimited high-pressure mock rounds.
+            Join thousands of software engineers practicing with PrepSmart AI. Start free or upgrade for unlimited high-pressure mock rounds.
           </p>
           <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
             <a

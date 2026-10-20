@@ -1,5 +1,5 @@
 -- ==============================================================================
--- PrepSmart AI 2.0 - Supabase PostgreSQL Schema
+-- PrepSmart AI - Supabase PostgreSQL Schema
 -- Run this script in your Supabase project's SQL Editor (Dashboard > SQL Editor)
 -- ==============================================================================
 

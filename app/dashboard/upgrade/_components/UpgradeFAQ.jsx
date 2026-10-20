@@ -8,7 +8,7 @@ export default function UpgradeFAQ() {
   const faqs = [
     {
       q: 'How does Ollama AI evaluate my interview responses?',
-      a: 'PrepSmart AI 2.0 connects with your local or cloud Ollama engine running Meta’s Llama 3.3. It analyzes your spoken transcripts against verified FAANG engineering rubrics, scoring architectural tradeoffs, code efficiency, communication clarity, and STAR-method structure with zero data harvesting.',
+      a: 'PrepSmart AI connects with your local or cloud Ollama engine running Meta’s Llama 3.3. It analyzes your spoken transcripts against verified FAANG engineering rubrics, scoring architectural tradeoffs, code efficiency, communication clarity, and STAR-method structure with zero data harvesting.',
     },
     {
       q: 'Can I switch between monthly and annual billing at any time?',

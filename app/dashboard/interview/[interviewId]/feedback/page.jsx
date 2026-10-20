@@ -279,7 +279,7 @@ function Feedback({ params }) {
   // Copy Full Report Summary
   const copyFullSummary = () => {
     const summaryText = [
-      `🎯 PrepSmart AI 2.0 • Mock Interview Performance Report`,
+      `🎯 PrepSmart AI • Mock Interview Performance Report`,
       `Role: ${interviewData?.jobPosition || "Technical Mock Interview"} (${interviewData?.jobExperience || "3"} Years Experience)`,
       `Overall Score: ${telemetry.avgScore} / 10 — ${verdict.tier}`,
       `Questions Answered: ${feedbackList.length}`,

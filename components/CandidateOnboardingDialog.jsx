@@ -220,7 +220,7 @@ export default function CandidateOnboardingDialog({ onComplete }) {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <DialogTitle className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                      Welcome to PrepSmart AI 2.0!
+                      Welcome to PrepSmart AI!
                     </DialogTitle>
                     <Badge variant="gradient" className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 shadow-sm">
                       AI Calibrator

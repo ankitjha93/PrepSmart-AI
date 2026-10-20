@@ -43,12 +43,12 @@ export default function Logo({ size = 38, className = "" }) {
     >
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-orange-500/25 via-pink-500/20 to-purple-600/30 blur-sm scale-110 -z-10 transition-all duration-300" />
       <Image
-        src="/logo.svg"
-        alt="PrepSmart AI Neural Logo"
+        src="/logo.png"
+        alt="PrepSmart AI 3D Neural Logo"
         width={size}
         height={size}
         priority
-        className="w-full h-full object-contain drop-shadow-md rounded-2xl"
+        className="w-full h-full object-contain drop-shadow-xl rounded-2xl"
       />
     </div>
   );
