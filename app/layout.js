@@ -13,11 +13,12 @@ export const metadata = {
   description: "Master behavioral and technical interviews with real-time AI feedback and speech analytics",
   icons: {
     icon: [
+      { url: "/icon.png", type: "image/png" },
       { url: "/logo.png", type: "image/png" },
       { url: "/favicon.ico", sizes: "any" },
     ],
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    shortcut: "/icon.png",
+    apple: "/apple-icon.png",
   },
 };
 
