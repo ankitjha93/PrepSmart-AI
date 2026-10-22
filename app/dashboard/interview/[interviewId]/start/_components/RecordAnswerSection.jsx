@@ -65,6 +65,7 @@ function RecordAnswerSection({
   const [selectedLang, setSelectedLang] = useState('en-US');
   const [speechSupported, setSpeechSupported] = useState(true);
   const [isRefreshingMics, setIsRefreshingMics] = useState(false);
+  const [cameraMetrics, setCameraMetrics] = useState({ fps: 30, resolutionLabel: '720p' });
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -907,6 +908,7 @@ function RecordAnswerSection({
           videoRef={webcamRef}
           isActive={true}
           showTelemetryDock={!isRecording}
+          onMetricsUpdate={setCameraMetrics}
         />
 
         {/* HUD Overlay: Live Feed Status (Top-Left) */}
@@ -914,7 +916,7 @@ function RecordAnswerSection({
           <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
           <span className="text-red-400 font-black">STUDIO CAM</span>
           <span className="text-white/40 hidden sm:inline">•</span>
-          <span className="hidden sm:inline">1080p 30fps</span>
+          <span className="hidden sm:inline">{cameraMetrics.resolutionLabel} {cameraMetrics.fps}fps</span>
         </div>
 
         {/* HUD Overlay: Transcriber Armed (Top-Right) */}

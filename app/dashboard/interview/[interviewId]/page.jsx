@@ -10,6 +10,8 @@ import { eq } from 'drizzle-orm';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import FaceDetectionHUD from '@/components/FaceDetectionHUD';
+import { useLiveAudioMeter } from '@/hooks/useLiveAudioMeter';
+import { OllamaService } from '@/utils/OllamaAIModal';
 import { 
   WebcamIcon, 
   Lightbulb, 
@@ -44,8 +46,38 @@ function Interview({ params }) {
   const containerRef = useRef(null);
   const webcamRef = useRef(null);
 
+  // Real-Time Hardware & AI Calibration Telemetry
+  const [cameraMetrics, setCameraMetrics] = useState({
+    fps: 30,
+    resolutionLabel: "720p",
+    isFaceDetected: false,
+    postureStatus: "searching",
+    lightingQuality: "optimal",
+    luxScore: 70,
+  });
+  const [ollamaStatus, setOllamaStatus] = useState({ online: true, model: "llama3.3" });
+
+  const {
+    audioVolume,
+    frequencyBands,
+    isSpeaking,
+    isMicAvailable,
+  } = useLiveAudioMeter({ isEnabled: webCamEnabled });
+
   useEffect(() => {
     GetInterviewDetails();
+    if (typeof window !== "undefined") {
+      OllamaService.checkStatus()
+        .then((res) => {
+          if (res) {
+            setOllamaStatus({
+              online: Boolean(res.online),
+              model: res.activeModel || res.model || "llama3.3",
+            });
+          }
+        })
+        .catch(() => {});
+    }
   }, []);
 
   const GetInterviewDetails = async () => {
@@ -318,6 +350,8 @@ function Interview({ params }) {
                   videoRef={webcamRef} 
                   isActive={webCamEnabled} 
                   showTelemetryDock={true}
+                  audioMeter={{ audioVolume, frequencyBands, isSpeaking }}
+                  onMetricsUpdate={setCameraMetrics}
                 />
 
                 {/* Live Feed Status Pill (Top-Left) */}
@@ -325,25 +359,30 @@ function Interview({ params }) {
                   <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
                   <span className="text-red-400 font-black">STUDIO CAM</span>
                   <span className="text-white/40">•</span>
-                  <span>1080p 30fps</span>
+                  <span>{cameraMetrics.resolutionLabel} {cameraMetrics.fps}fps</span>
                 </div>
 
                 {/* AI Face Tracker Overlay (Top-Right) */}
                 <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600/70 backdrop-blur-md border border-blue-400/30 text-white text-[11px] font-bold shadow-lg">
                   <BrainCircuit className="w-3.5 h-3.5 text-blue-200" />
-                  <span>AI Face & Speech Calibrated</span>
+                  <span>AI Engine Armed ({ollamaStatus.model || "Llama 3.3"})</span>
                 </div>
 
-                {/* Simulated Live Audio Equalizer Meter (Bottom-Left) */}
-                <div className="absolute bottom-4 left-4 z-20 flex items-center gap-2 px-3 py-2 rounded-2xl bg-black/60 backdrop-blur-md border border-white/10 text-white text-[11px]">
-                  <Mic className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                  <span className="text-slate-300 font-semibold text-[10px]">Mic Active:</span>
-                  <div className="flex items-end gap-1 h-3.5">
-                    <span className="w-1 bg-emerald-400 rounded-full animate-[bounce_0.8s_infinite] h-2" />
-                    <span className="w-1 bg-emerald-400 rounded-full animate-[bounce_0.5s_infinite_0.2s] h-3.5" />
-                    <span className="w-1 bg-emerald-400 rounded-full animate-[bounce_0.7s_infinite_0.4s] h-2.5" />
-                    <span className="w-1 bg-emerald-400 rounded-full animate-[bounce_0.6s_infinite_0.1s] h-3" />
+                {/* Mobile-Only Floating Live Audio Equalizer Meter (Bottom-Left) */}
+                <div className="md:hidden absolute bottom-4 left-4 z-20 flex items-center gap-2 px-2.5 py-1.5 rounded-2xl bg-black/75 backdrop-blur-md border border-white/10 text-white text-[10px]">
+                  <Mic className={`w-3 h-3 ${isSpeaking ? "text-emerald-400 animate-pulse" : "text-slate-400"}`} />
+                  <div className="flex items-end gap-0.5 h-3">
+                    {frequencyBands.map((level, i) => (
+                      <span
+                        key={i}
+                        className={`w-1 rounded-full transition-all duration-75 ${
+                          isSpeaking ? "bg-emerald-400" : "bg-slate-500"
+                        }`}
+                        style={{ height: `${Math.max(2, (level / 100) * 12)}px` }}
+                      />
+                    ))}
                   </div>
+                  <span className="text-[9px] font-mono text-slate-300">{audioVolume}%</span>
                 </div>
 
                 {/* Disable Camera Control Button (Bottom-Right) */}
@@ -410,27 +449,27 @@ function Interview({ params }) {
                 <span className="text-xs font-bold text-slate-900 dark:text-white">Camera</span>
               </div>
               <span className={`text-[10px] font-semibold ${webCamEnabled ? 'text-emerald-500' : 'text-slate-400'}`}>
-                {webCamEnabled ? 'Calibrated & Live' : 'Optional'}
+                {webCamEnabled ? `${cameraMetrics.resolutionLabel} Live` : 'Optional'}
               </span>
             </div>
 
             <div className="p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 text-center">
               <div className="flex items-center justify-center gap-1.5 mb-0.5">
-                <Mic className="w-3.5 h-3.5 text-blue-500" />
+                <Mic className={`w-3.5 h-3.5 ${webCamEnabled && isMicAvailable ? (isSpeaking ? 'text-emerald-500 animate-pulse' : 'text-blue-500') : 'text-slate-400'}`} />
                 <span className="text-xs font-bold text-slate-900 dark:text-white">Microphone</span>
               </div>
-              <span className="text-[10px] font-semibold text-blue-500">
-                Ready to Record
+              <span className={`text-[10px] font-semibold ${webCamEnabled && isMicAvailable ? (isSpeaking ? 'text-emerald-500' : 'text-blue-500') : 'text-slate-400'}`}>
+                {webCamEnabled && isMicAvailable ? (isSpeaking ? 'Voice Active' : 'Listening (Ready)') : 'Ready to Test'}
               </span>
             </div>
 
             <div className="p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 text-center">
               <div className="flex items-center justify-center gap-1.5 mb-0.5">
-                <Cpu className="w-3.5 h-3.5 text-purple-500" />
+                <Cpu className={`w-3.5 h-3.5 ${ollamaStatus.online ? 'text-purple-500' : 'text-amber-500'}`} />
                 <span className="text-xs font-bold text-slate-900 dark:text-white">AI Engine</span>
               </div>
-              <span className="text-[10px] font-semibold text-purple-500">
-                Ollama AI Armed
+              <span className={`text-[10px] font-semibold ${ollamaStatus.online ? 'text-purple-500' : 'text-amber-500'}`}>
+                {ollamaStatus.online ? `${ollamaStatus.model || 'Llama 3.3'} Armed` : 'AI Standby'}
               </span>
             </div>
           </div>
