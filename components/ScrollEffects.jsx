@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { ChevronUp } from "lucide-react";
 import gsap from "gsap";
-import { useLenis } from "lenis/react";
 
 /**
  * Modern Scroll Progress Tracker with Real-Time Telemetry & Floating Metric Gauge
@@ -12,22 +11,14 @@ import { useLenis } from "lenis/react";
  * - Real-time floating telemetry pill badge displaying exact reading depth (XX% Read)
  * - Glassmorphic floating Back-to-Top HUD with circular SVG progress meter & live numeric % counter
  * - Seamless hover morphing between live percentage counter and animated upward chevron
- * - Micro-spring physics and Lenis smooth scroll restoration
+ * - Micro-spring physics and smooth scroll restoration
  */
 export default function ScrollEffects() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Hook into Lenis scroll events when available
-  const lenis = useLenis(({ scroll, limit, progress }) => {
-    setScrollProgress(Math.min(Math.max((progress || 0) * 100, 0), 100));
-    setShowBackToTop(scroll > 200);
-  });
-
-  // Fallback native scroll listener (e.g. when Lenis is disabled or reduced-motion is active)
   useEffect(() => {
-    if (lenis) return;
     if (typeof window === "undefined") return;
 
     const handleScroll = () => {
@@ -48,17 +39,13 @@ export default function ScrollEffects() {
     handleScroll();
 
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lenis]);
+  }, []);
 
   const scrollToTop = () => {
-    if (lenis) {
-      lenis.scrollTo(0, { duration: 1.2 });
-    } else {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-    }
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   const handleMouseEnter = (e) => {
