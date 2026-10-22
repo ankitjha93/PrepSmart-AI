@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { WaveFile } from 'wavefile';
-import { pipeline } from '@xenova/transformers';
+import { pipeline, env } from '@xenova/transformers';
+
+// On serverless environments like Vercel, ensure ONNX model cache writes to writable /tmp
+if (process.env.VERCEL) {
+  env.cacheDir = '/tmp';
+}
 
 export const dynamic = 'force-dynamic';
 
