@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import MouseEffect from "@/components/MouseEffect";
 import ScrollEffects from "@/components/ScrollEffects";
 import { ThemeProvider } from "@/components/theme-provider";
+import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 
 const inter = Outfit({ subsets: ["latin"] });
 
@@ -39,10 +40,12 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
-            <Toaster />
-            <MouseEffect />
-            <ScrollEffects />
-            {children}
+            <SmoothScrollProvider>
+              <Toaster />
+              <MouseEffect />
+              <ScrollEffects />
+              {children}
+            </SmoothScrollProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
