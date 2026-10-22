@@ -336,7 +336,7 @@ function Header() {
                 AI
               </Badge>
             </div>
-            <div className="flex items-center gap-1.5 text-[10px] font-medium text-slate-400 dark:text-slate-500 hidden sm:flex tracking-wide -mt-0.5">
+            <div className="flex items-center gap-1.5 text-[10px] font-medium text-slate-400 dark:text-slate-500 hidden xl:flex tracking-wide -mt-0.5 whitespace-nowrap">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
               <span>Adaptive Interview Intelligence</span>
             </div>
@@ -346,39 +346,40 @@ function Header() {
         {/* =================================================================== */}
         {/* CENTER NAVIGATION PILL (Desktop)                                  */}
         {/* =================================================================== */}
-        <nav className="hidden lg:flex items-center">
-          <ul className="flex items-center gap-1 bg-slate-100/90 dark:bg-slate-800/80 p-1.5 rounded-full border border-slate-200/60 dark:border-slate-700/60 shadow-inner">
+        <nav className="hidden lg:flex items-center shrink-0">
+          <ul className="flex items-center gap-1 bg-slate-100/80 dark:bg-slate-900/60 backdrop-blur-xl p-1 rounded-full border border-slate-200/70 dark:border-slate-800 shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)]">
             {navLinks.map((item) => {
               const isActive = path === item.href;
               const Icon = item.icon;
               return (
-                <li key={item.name} className="nav-pill-item">
+                <li key={item.name} className="nav-pill-item shrink-0">
                   <Link 
                     href={item.href}
                     onMouseEnter={handleNavItemEnter}
                     onMouseLeave={handleNavItemLeave}
-                    className={`relative px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-2 group ${
+                    className={`relative px-3 sm:px-3.5 py-1.5 rounded-full text-xs transition-all duration-200 flex items-center gap-1.5 group select-none whitespace-nowrap ${
                       isActive
-                        ? 'text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-md shadow-blue-500/30 font-bold'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white/90 dark:hover:bg-slate-700/80'
+                        ? 'text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 shadow-md shadow-blue-500/25 font-bold ring-1 ring-white/20'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white/80 dark:hover:bg-slate-800/80 font-medium'
                     }`}
                   >
-                    <Icon className={`nav-icon w-3.5 h-3.5 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400'}`} />
-                    <span className="nav-text transition-colors">{item.name}</span>
+                    <Icon className={`nav-icon w-3.5 h-3.5 transition-colors shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400'}`} />
+                    <span className="nav-text transition-colors whitespace-nowrap">{item.name}</span>
                     {item.badge && (
-                      <Badge 
-                        variant={isActive ? "outline" : "success"}
-                        className={`nav-badge text-[9px] font-black uppercase tracking-wider px-1.5 py-0 ${
+                      <span 
+                        className={`nav-badge text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full leading-none shrink-0 transition-all ${
                           isActive 
-                            ? 'bg-white text-blue-600 border-none' 
-                            : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm'
+                            ? 'bg-white/25 text-white backdrop-blur-sm border border-white/40' 
+                            : item.badge === 'PRO'
+                              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm shadow-amber-500/25'
+                              : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm shadow-emerald-500/25'
                         }`}
                       >
                         {item.badge}
-                      </Badge>
+                      </span>
                     )}
                     {/* Animated bottom indicator bar */}
-                    <span className={`nav-indicator absolute -bottom-0.5 left-4 right-4 h-0.5 rounded-full bg-gradient-to-r from-blue-400 via-indigo-300 to-white/90 shadow-sm transition-all duration-300 ${isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`} />
+                    <span className={`nav-indicator absolute -bottom-0.5 left-3 right-3 h-0.5 rounded-full bg-gradient-to-r from-blue-400 via-indigo-300 to-white/90 shadow-sm transition-all duration-300 ${isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`} />
                   </Link>
                 </li>
               );
@@ -389,15 +390,22 @@ function Header() {
         {/* =================================================================== */}
         {/* RIGHT ACTION BUTTONS & USER PROFILE                                 */}
         {/* =================================================================== */}
-        <div className="nav-action flex items-center gap-2 sm:gap-2.5" ref={dropdownRef}>
+        <div className="nav-action flex items-center gap-1.5 sm:gap-2.5 shrink-0" ref={dropdownRef}>
           {/* Live Ollama AI Engine Telemetry Pill */}
           <div 
-            title={ollamaStatus.online ? "Local Ollama daemon running on port 11434 (llama3.3)" : "Ollama local AI ready (Fallback active)"}
-            className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200/80 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-800/70 text-[11px] font-bold text-slate-700 dark:text-slate-300 shadow-sm"
+            title={ollamaStatus.online ? "Local Ollama daemon online (port 11434 • llama3.3)" : "Ollama local AI ready (Fallback active)"}
+            className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200/80 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/80 backdrop-blur-md text-[11px] font-bold text-slate-700 dark:text-slate-300 shadow-sm shrink-0 whitespace-nowrap select-none"
           >
-            <span className={`w-2 h-2 rounded-full ${ollamaStatus.online ? 'bg-emerald-500 animate-pulse' : 'bg-blue-400'}`} />
-            <span className="font-mono">Ollama {(ollamaStatus.model || 'llama3.3').toUpperCase()}</span>
-            <span className={`text-[9px] font-black uppercase px-1.5 py-0.2 rounded-md ${ollamaStatus.online ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'}`}>
+            <div className="relative flex items-center justify-center">
+              <span className={`w-2 h-2 rounded-full ${ollamaStatus.online ? 'bg-emerald-500' : 'bg-blue-500'}`} />
+              <span className={`absolute w-3 h-3 rounded-full opacity-75 animate-ping ${ollamaStatus.online ? 'bg-emerald-400' : 'bg-blue-400'}`} />
+            </div>
+            <div className="flex items-center gap-1.5 text-xs font-medium">
+              <span className="font-bold text-slate-800 dark:text-slate-200">Ollama</span>
+              <span className="text-slate-400 dark:text-slate-500 text-[10px]">•</span>
+              <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-tight">{(ollamaStatus.model || 'llama3.3')}</span>
+            </div>
+            <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ${ollamaStatus.online ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-700/40' : 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'}`}>
               {ollamaStatus.online ? 'Online' : 'Ready'}
             </span>
           </div>
@@ -408,7 +416,7 @@ function Header() {
             onClick={toggleTheme}
             aria-label="Toggle dark/light theme"
             title={`Switch to ${resolvedTheme === 'dark' ? 'Light' : 'Dark'} mode`}
-            className="w-8 h-8 rounded-full flex items-center justify-center border border-slate-200/80 dark:border-slate-700/80 bg-white/90 dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors shadow-sm cursor-pointer group shrink-0"
+            className="w-8 h-8 rounded-full flex items-center justify-center border border-slate-200/80 dark:border-slate-700/80 bg-white/90 dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 shadow-sm cursor-pointer group shrink-0"
           >
             {mounted && resolvedTheme === 'dark' ? (
               <Sun className="w-4 h-4 text-amber-400 group-hover:rotate-45 transition-transform duration-300" />
@@ -418,42 +426,42 @@ function Header() {
           </button>
 
           {user ? (
-            <div className="flex items-center gap-2 sm:gap-2.5">
+            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
               {/* Quick "+ New Mock" shortcut with glowing gradient */}
               <button 
                 type="button"
                 onClick={() => window.dispatchEvent(new CustomEvent('prepsmart_open_new_mock'))}
                 onMouseMove={handleMagneticMove}
                 onMouseLeave={handleMagneticLeave}
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 hover:scale-[1.02] active:scale-95 cursor-pointer group"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 hover:scale-[1.02] active:scale-95 cursor-pointer group shrink-0 whitespace-nowrap"
               >
                 <Plus className="w-3.5 h-3.5 group-hover:rotate-90 transition-transform duration-300" />
                 <span>New Mock</span>
               </button>
 
               {/* User Avatar & Dropdown Trigger */}
-              <div className="relative">
+              <div className="relative shrink-0">
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2 p-1.5 pr-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition border border-slate-200/80 dark:border-slate-700/80 shadow-sm bg-white dark:bg-slate-900 group"
+                  className="flex items-center gap-2 p-1 pr-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition border border-slate-200/80 dark:border-slate-700/80 shadow-sm bg-white dark:bg-slate-900 group shrink-0"
                   aria-label="User profile menu"
                 >
-                  <Avatar className="w-8 h-8 group-hover:scale-105 transition-transform">
+                  <Avatar className="w-7 h-7 sm:w-8 sm:h-8 group-hover:scale-105 transition-transform ring-2 ring-blue-500/20">
                     <AvatarImage 
                       src={user.imageUrl || (typeof window !== 'undefined' && user?.id ? (localStorage.getItem(`prepsmart_user_avatar_${user.id}`) || localStorage.getItem('prepsmart_user_avatar')) : null)} 
                       alt={user.fullName || "User"} 
                     />
                     <AvatarFallback>{userInitial}</AvatarFallback>
                   </Avatar>
-                  <span className="hidden md:inline text-xs font-bold text-slate-800 dark:text-slate-200 max-w-[110px] truncate">
+                  <span className="hidden md:inline text-xs font-bold text-slate-800 dark:text-slate-200 max-w-[110px] truncate whitespace-nowrap">
                     {user.fullName || user.email}
                   </span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ${dropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* Dropdown Menu Modal */}
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2.5 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="absolute right-0 mt-2.5 w-72 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-slate-200/90 dark:border-slate-800 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                     <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800/80 mb-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
