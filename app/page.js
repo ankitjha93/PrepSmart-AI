@@ -374,8 +374,8 @@ export default function Home() {
       <Header />
 
       {/* Ambient Animated Glow Blobs (Royal Blue & Emerald) */}
-      <div className="ambient-glow-1 floating-ambient-glow w-[580px] h-[580px] bg-[#2563EB]/15 top-16 -left-36" />
-      <div className="ambient-glow-2 floating-ambient-glow w-[680px] h-[680px] bg-[#10B981]/15 top-36 -right-36" />
+      <div className="ambient-glow-1 floating-ambient-glow w-[580px] h-[580px] bg-[#2563EB]/15 top-16 -left-36 pointer-events-none" />
+      <div className="ambient-glow-2 floating-ambient-glow w-[680px] h-[680px] bg-[#10B981]/15 top-36 -right-36 pointer-events-none" />
 
       {/* ========================================================================= */}
       {/* HERO SECTION                                                             */}

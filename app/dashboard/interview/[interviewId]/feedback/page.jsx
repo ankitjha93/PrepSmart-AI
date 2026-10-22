@@ -505,7 +505,7 @@ function Feedback({ params }) {
           </div>
 
           {/* 4-QUADRANT AI COMPETENCY BREAKDOWN */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 report-stagger-item">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 report-stagger-item">
             
             {/* 1. Technical Accuracy */}
             <div className="p-4 md:p-5 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-md space-y-2">

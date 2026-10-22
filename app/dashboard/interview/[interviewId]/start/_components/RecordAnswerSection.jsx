@@ -992,7 +992,7 @@ function RecordAnswerSection({
           <span>Input & Language:</span>
         </div>
 
-        <div className="flex items-center gap-2 flex-1 sm:justify-end flex-wrap sm:flex-nowrap">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-1 sm:justify-end w-full sm:w-auto">
           {/* Dialect / Language Selector */}
           <select
             value={selectedLang}
@@ -1005,39 +1005,41 @@ function RecordAnswerSection({
               }
             }}
             title="Speech Recognition Language"
-            className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/40 cursor-pointer shadow-sm"
+            className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/40 cursor-pointer shadow-sm w-full sm:w-auto"
           >
             <option value="en-US">English (US)</option>
             <option value="en-IN">English (India)</option>
             <option value="en-GB">English (UK)</option>
           </select>
 
-          {/* Microphone Selector */}
-          <select
-            value={selectedDeviceId}
-            onChange={handleDeviceChange}
-            className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/40 w-full sm:w-auto max-w-xs truncate cursor-pointer shadow-sm"
-          >
-            <option value="default">Default System Microphone</option>
-            {audioDevices
-              .filter((d) => d.deviceId && d.deviceId !== 'default')
-              .map((device, idx) => (
-                <option key={device.deviceId || idx} value={device.deviceId}>
-                  {device.label || `Microphone ${idx + 1}`}
-                </option>
-              ))}
-          </select>
+          {/* Microphone Selector & Refresh button wrapper */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <select
+              value={selectedDeviceId}
+              onChange={handleDeviceChange}
+              className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/40 w-full sm:w-auto max-w-full sm:max-w-xs truncate cursor-pointer shadow-sm"
+            >
+              <option value="default">Default System Microphone</option>
+              {audioDevices
+                .filter((d) => d.deviceId && d.deviceId !== 'default')
+                .map((device, idx) => (
+                  <option key={device.deviceId || idx} value={device.deviceId}>
+                    {device.label || `Microphone ${idx + 1}`}
+                  </option>
+                ))}
+            </select>
 
-          <button
-            type="button"
-            disabled={isRefreshingMics}
-            onClick={() => refreshAudioDevices(true)}
-            title="Scan and refresh available microphones"
-            aria-label="Refresh available microphones"
-            className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-all duration-200 disabled:opacity-50 shadow-sm active:scale-95"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshingMics ? 'animate-spin text-blue-600 dark:text-blue-400' : ''}`} />
-          </button>
+            <button
+              type="button"
+              disabled={isRefreshingMics}
+              onClick={() => refreshAudioDevices(true)}
+              title="Scan and refresh available microphones"
+              aria-label="Refresh available microphones"
+              className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-all duration-200 disabled:opacity-50 shadow-sm active:scale-95 shrink-0"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshingMics ? 'animate-spin text-blue-600 dark:text-blue-400' : ''}`} />
+            </button>
+          </div>
         </div>
       </div>
 

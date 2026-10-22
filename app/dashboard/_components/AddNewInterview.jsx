@@ -463,7 +463,7 @@ function AddNewInterview() {
                 <span className="text-[11px] font-semibold text-slate-400">{jobExperience} Years</span>
               </div>
 
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {EXPERIENCE_PRESETS.map((item, idx) => {
                   const isSelected = jobExperience === item.years;
                   const Icon = item.icon;
@@ -498,7 +498,7 @@ function AddNewInterview() {
                 Round Question Count & Duration
               </label>
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {QUESTION_COUNT_OPTIONS.map((opt) => {
                   const isSelected = questionCount === opt.count;
                   return (

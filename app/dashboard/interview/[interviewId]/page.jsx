@@ -472,7 +472,7 @@ function Interview({ params }) {
           </div>
 
           {/* HARDWARE READINESS CHECK CHIPS */}
-          <div className="interview-setup-anim grid grid-cols-3 gap-3">
+          <div className="interview-setup-anim grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <div className="p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 text-center">
               <div className="flex items-center justify-center gap-1.5 mb-0.5">
                 <Video className={`w-3.5 h-3.5 ${webCamEnabled ? 'text-emerald-500' : 'text-slate-400'}`} />

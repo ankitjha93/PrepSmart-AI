@@ -126,8 +126,8 @@ export default function Upgrade() {
         </div>
 
         {/* Payment Methods Pill */}
-        <div className="flex items-center justify-center gap-2 pt-1 text-[11px] text-slate-400">
-          <CreditCard className="w-3.5 h-3.5 text-blue-500" />
+        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 pt-1 text-[11px] text-slate-400 text-center px-3 leading-relaxed">
+          <CreditCard className="w-3.5 h-3.5 text-blue-500 shrink-0" />
           <span>Powered by <strong>Razorpay</strong> • UPI (GPay, PhonePe, Paytm), NetBanking & All Cards Accepted</span>
         </div>
       </div>
