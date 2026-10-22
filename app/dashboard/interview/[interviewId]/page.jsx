@@ -10,6 +10,7 @@ import { eq } from 'drizzle-orm';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import FaceDetectionHUD from '@/components/FaceDetectionHUD';
+import HardwarePreflightSuite from './_components/HardwarePreflightSuite';
 import { useLiveAudioMeter } from '@/hooks/useLiveAudioMeter';
 import { OllamaService } from '@/utils/OllamaAIModal';
 import { 
@@ -46,6 +47,11 @@ function Interview({ params }) {
   const containerRef = useRef(null);
   const webcamRef = useRef(null);
 
+  // Hardware Device Routing States
+  const [selectedVideoDeviceId, setSelectedVideoDeviceId] = useState('');
+  const [selectedAudioDeviceId, setSelectedAudioDeviceId] = useState('');
+  const [isTestingMic, setIsTestingMic] = useState(false);
+
   // Real-Time Hardware & AI Calibration Telemetry
   const [cameraMetrics, setCameraMetrics] = useState({
     fps: 30,
@@ -62,7 +68,12 @@ function Interview({ params }) {
     frequencyBands,
     isSpeaking,
     isMicAvailable,
-  } = useLiveAudioMeter({ isEnabled: webCamEnabled });
+    activeMicLabel,
+    audioLevelStatus,
+  } = useLiveAudioMeter({
+    isEnabled: webCamEnabled || isTestingMic,
+    deviceId: selectedAudioDeviceId,
+  });
 
   useEffect(() => {
     GetInterviewDetails();
@@ -267,7 +278,7 @@ function Interview({ params }) {
                 <div className="flex items-center gap-1.5">
                   <Award className="w-4 h-4 text-amber-500" />
                   <span className="text-sm font-black text-slate-900 dark:text-white">
-                    {interviewData?.jobExperience || "3"} Years
+                    {interviewData?.jobExperience || "3"} {Number(interviewData?.jobExperience) === 1 ? "Year" : "Years"}
                   </span>
                 </div>
               </div>
@@ -286,7 +297,21 @@ function Interview({ params }) {
             </div>
           </div>
 
-          {/* CARD 2: PRIVACY & EVALUATION PROTOCOL (REPLACING PLAIN YELLOW ALERT) */}
+          {/* CARD 2: HARDWARE PRE-FLIGHT DIAGNOSTICS & SPEECH CALIBRATION */}
+          <HardwarePreflightSuite
+            selectedVideoDeviceId={selectedVideoDeviceId}
+            onVideoDeviceChange={setSelectedVideoDeviceId}
+            selectedAudioDeviceId={selectedAudioDeviceId}
+            onAudioDeviceChange={setSelectedAudioDeviceId}
+            audioVolume={audioVolume}
+            audioLevelStatus={audioLevelStatus}
+            frequencyBands={frequencyBands}
+            isSpeaking={isSpeaking}
+            isTestingMic={isTestingMic}
+            onToggleTestMic={() => setIsTestingMic((prev) => !prev)}
+          />
+
+          {/* CARD 3: PRIVACY & EVALUATION PROTOCOL (REPLACING PLAIN YELLOW ALERT) */}
           <div className="interview-setup-anim relative p-5 rounded-3xl border border-emerald-500/20 dark:border-emerald-500/20 bg-gradient-to-br from-emerald-50/70 via-slate-50 to-white dark:from-emerald-950/20 dark:via-slate-900/90 dark:to-slate-900 shadow-lg space-y-3.5">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
@@ -341,6 +366,11 @@ function Interview({ params }) {
                   ref={webcamRef}
                   onUserMedia={() => setWebCamEnabled(true)}
                   onUserMediaError={() => setWebCamEnabled(false)}
+                  videoConstraints={
+                    selectedVideoDeviceId
+                      ? { deviceId: { exact: selectedVideoDeviceId } }
+                      : undefined
+                  }
                   mirrored={true}
                   className="w-full h-full object-cover rounded-3xl"
                 />
@@ -455,11 +485,11 @@ function Interview({ params }) {
 
             <div className="p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 text-center">
               <div className="flex items-center justify-center gap-1.5 mb-0.5">
-                <Mic className={`w-3.5 h-3.5 ${webCamEnabled && isMicAvailable ? (isSpeaking ? 'text-emerald-500 animate-pulse' : 'text-blue-500') : 'text-slate-400'}`} />
+                <Mic className={`w-3.5 h-3.5 ${webCamEnabled || isTestingMic ? (isSpeaking ? 'text-emerald-500 animate-pulse' : 'text-blue-500') : 'text-slate-400'}`} />
                 <span className="text-xs font-bold text-slate-900 dark:text-white">Microphone</span>
               </div>
-              <span className={`text-[10px] font-semibold ${webCamEnabled && isMicAvailable ? (isSpeaking ? 'text-emerald-500' : 'text-blue-500') : 'text-slate-400'}`}>
-                {webCamEnabled && isMicAvailable ? (isSpeaking ? 'Voice Active' : 'Listening (Ready)') : 'Ready to Test'}
+              <span className={`text-[10px] font-semibold ${webCamEnabled || isTestingMic ? (isSpeaking ? 'text-emerald-500' : 'text-blue-500') : 'text-slate-400'}`}>
+                {webCamEnabled || isTestingMic ? (isSpeaking ? 'Voice Active' : audioLevelStatus === 'quiet' ? 'Quiet Level' : 'Listening (Ready)') : 'Ready to Test'}
               </span>
             </div>
 

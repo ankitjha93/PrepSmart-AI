@@ -6,14 +6,15 @@ import { useState, useEffect, useRef, useCallback } from "react";
  * useLiveAudioMeter Hook
  * Captures live microphone audio using Web Audio API (AudioContext + AnalyserNode)
  * Computes real-time RMS vocal volume (0-100), 4-band frequency spectrum,
- * speech presence detection, and device label.
+ * speech presence detection, device label, and level status (quiet, optimal, peaking).
  */
-export function useLiveAudioMeter({ isEnabled = false }) {
+export function useLiveAudioMeter({ isEnabled = false, deviceId = "" }) {
   const [audioVolume, setAudioVolume] = useState(0); // 0 - 100
   const [frequencyBands, setFrequencyBands] = useState([8, 8, 8, 8]); // 4 normalized equalizer bands
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [activeMicLabel, setActiveMicLabel] = useState("");
   const [isMicAvailable, setIsMicAvailable] = useState(false);
+  const [audioLevelStatus, setAudioLevelStatus] = useState("silent"); // 'silent' | 'quiet' | 'optimal' | 'peaking'
 
   const audioStreamRef = useRef(null);
   const audioContextRef = useRef(null);
@@ -48,6 +49,7 @@ export function useLiveAudioMeter({ isEnabled = false }) {
     setAudioVolume(0);
     setFrequencyBands([8, 8, 8, 8]);
     setIsSpeaking(false);
+    setAudioLevelStatus("silent");
   }, []);
 
   useEffect(() => {
@@ -64,12 +66,18 @@ export function useLiveAudioMeter({ isEnabled = false }) {
       }
 
       try {
+        const audioConstraints = {
+          echoCancellation: true,
+          noiseSuppression: false,
+          autoGainControl: true,
+        };
+
+        if (deviceId && deviceId !== "default") {
+          audioConstraints.deviceId = { exact: deviceId };
+        }
+
         const stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: false,
-            autoGainControl: true,
-          },
+          audio: audioConstraints,
         });
 
         if (isCancelled || !isEnabledRef.current) {
@@ -121,6 +129,11 @@ export function useLiveAudioMeter({ isEnabled = false }) {
           setAudioVolume(vol);
           setIsSpeaking(vol > 10);
 
+          if (vol === 0) setAudioLevelStatus("silent");
+          else if (vol < 15) setAudioLevelStatus("quiet");
+          else if (vol <= 75) setAudioLevelStatus("optimal");
+          else setAudioLevelStatus("peaking");
+
           // 4 Frequency bands: Bass, Low-Mid, High-Mid, Treble
           const binChunk = Math.max(1, Math.floor(freqData.length / 4));
           const bands = [0, 0, 0, 0];
@@ -150,7 +163,7 @@ export function useLiveAudioMeter({ isEnabled = false }) {
       isCancelled = true;
       cleanupAudio();
     };
-  }, [isEnabled, cleanupAudio]);
+  }, [isEnabled, deviceId, cleanupAudio]);
 
   return {
     audioVolume,
@@ -158,5 +171,6 @@ export function useLiveAudioMeter({ isEnabled = false }) {
     isSpeaking,
     activeMicLabel,
     isMicAvailable,
+    audioLevelStatus,
   };
 }
