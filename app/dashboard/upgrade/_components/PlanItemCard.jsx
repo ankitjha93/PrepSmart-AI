@@ -1,22 +1,30 @@
 "use client";
 import React from 'react';
-import { Check, X, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Check, X, Sparkles, ArrowRight, ShieldCheck, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
-export default function PlanItemCard({ plan, billingCycle = 'monthly', user }) {
-  const isPaid = plan.monthlyCost > 0;
+export default function PlanItemCard({
+  plan,
+  billingCycle = 'annual',
+  currency = 'INR',
+  user,
+  onSelectPlan,
+  isProcessing = false,
+  isCurrentPlan = false,
+}) {
   const isPopular = plan.popular;
-  const cost = billingCycle === 'annual' ? plan.annualCost : plan.monthlyCost;
-  const annualTotal = plan.annualCost * 12;
-
-  // Checkout Link Builder
-  const getCheckoutUrl = () => {
-    if (!plan.paymentLink) return '#';
-    const emailParam = user?.email ? `?prefilled_email=${encodeURIComponent(user.email)}` : '';
-    return `${plan.paymentLink}${emailParam}`;
+  const pricing = plan.pricing?.[currency] || {
+    monthly: plan.monthlyCost,
+    annual: plan.annualCost,
+    symbol: currency === 'INR' ? '₹' : '$',
   };
+
+  const symbol = pricing.symbol || (currency === 'INR' ? '₹' : '$');
+  const perMonth = billingCycle === 'annual' ? pricing.annual : pricing.monthly;
+  const annualTotal = pricing.annual * 12;
+  const isPaid = perMonth > 0;
 
   const handleFreeAction = () => {
     toast.info("You are currently enjoying the Starter Community plan.");
@@ -59,7 +67,7 @@ export default function PlanItemCard({ plan, billingCycle = 'monthly', user }) {
           {/* Price Numbers */}
           <div className="mt-4 flex items-baseline justify-center gap-1">
             <span className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
-              ${cost}
+              {symbol}{perMonth.toLocaleString()}
             </span>
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
               /month
@@ -70,7 +78,7 @@ export default function PlanItemCard({ plan, billingCycle = 'monthly', user }) {
           <div className="mt-1 h-5">
             {isPaid && billingCycle === 'annual' ? (
               <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-                Billed annually (${annualTotal}/yr) • Save 25%
+                Billed annually ({symbol}{annualTotal.toLocaleString()}/yr) • Save 25%
               </span>
             ) : isPaid ? (
               <span className="text-[11px] font-medium text-slate-400">
@@ -118,26 +126,41 @@ export default function PlanItemCard({ plan, billingCycle = 'monthly', user }) {
 
       {/* CTA Button */}
       <div>
-        {isPaid ? (
-          <a
-            href={getCheckoutUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full cursor-pointer"
+        {isCurrentPlan ? (
+          <Button
+            disabled
+            variant="outline"
+            className="w-full py-5 rounded-2xl font-bold text-xs border-emerald-500/40 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-2 cursor-default"
           >
-            <Button
-              className={`w-full py-5 rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                isPopular
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/25 hover:scale-[1.02]'
-                  : 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-800 dark:hover:bg-slate-700'
-              }`}
-            >
-              <span>{plan.ctaText}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Button>
-          </a>
+            <Check className="w-4 h-4 text-emerald-500" />
+            <span>Current Active Plan</span>
+          </Button>
+        ) : isPaid ? (
+          <Button
+            type="button"
+            disabled={isProcessing}
+            onClick={() => onSelectPlan && onSelectPlan(plan)}
+            className={`w-full py-5 rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              isPopular
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/25 hover:scale-[1.02]'
+                : 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-800 dark:hover:bg-slate-700'
+            }`}
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Opening Razorpay...</span>
+              </>
+            ) : (
+              <>
+                <span>{plan.ctaText}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </>
+            )}
+          </Button>
         ) : (
           <Button
+            type="button"
             onClick={handleFreeAction}
             variant="outline"
             className="w-full py-5 rounded-2xl font-bold text-xs border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
@@ -148,7 +171,7 @@ export default function PlanItemCard({ plan, billingCycle = 'monthly', user }) {
 
         <div className="flex items-center justify-center gap-1.5 mt-2.5 text-[10px] text-slate-400">
           <ShieldCheck className="w-3 h-3 text-emerald-500" />
-          <span>14-day risk-free money-back guarantee</span>
+          <span>Instant activation via Razorpay • 14-day refund</span>
         </div>
       </div>
     </div>

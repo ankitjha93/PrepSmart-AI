@@ -46,4 +46,29 @@ test.describe('PrepSmart AI - Upgrade & Pricing Suite', () => {
     await faqTitle.scrollIntoViewIfNeeded();
     await expect(faqTitle).toBeVisible();
   });
+
+  test('should switch between INR and USD currencies and display Razorpay trust badge', async ({ page }) => {
+    // Check Razorpay security text
+    await expect(page.locator('text=Bank-Grade 256-Bit Razorpay Security')).toBeVisible();
+
+    // Check currency buttons
+    const inrBtn = page.getByRole('button', { name: /₹ INR/i });
+    const usdBtn = page.getByRole('button', { name: /\$ USD/i });
+
+    await expect(inrBtn).toBeVisible();
+    await expect(usdBtn).toBeVisible();
+
+    // Default INR shows ₹ symbol in price
+    await expect(page.locator('text=₹699').first()).toBeVisible();
+
+    // Switch to USD
+    await usdBtn.click();
+    await page.waitForTimeout(300);
+    await expect(page.locator('text=$11').first()).toBeVisible();
+
+    // Switch back to INR
+    await inrBtn.click();
+    await page.waitForTimeout(300);
+    await expect(page.locator('text=₹699').first()).toBeVisible();
+  });
 });

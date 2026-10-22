@@ -5,6 +5,8 @@ import PLAN_TIERS from '@/utils/planData';
 import PlanItemCard from './_components/PlanItemCard';
 import FeatureMatrix from './_components/FeatureMatrix';
 import UpgradeFAQ from './_components/UpgradeFAQ';
+import PaymentSuccessModal from './_components/PaymentSuccessModal';
+import { useRazorpayCheckout } from '@/hooks/useRazorpayCheckout';
 import { 
   Sparkles, 
   ShieldCheck, 
@@ -13,16 +15,36 @@ import {
   Award, 
   Star, 
   CheckCircle2, 
-  ArrowRight 
+  ArrowRight,
+  CreditCard
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function Upgrade() {
   const { user } = useAuth();
-  const [billingCycle, setBillingCycle] = useState('annual'); // Default to annual for best discount
+  const [billingCycle, setBillingCycle] = useState('annual'); // 'monthly' | 'annual'
+  const [currency, setCurrency] = useState('INR'); // 'INR' | 'USD'
+  const [successDetails, setSuccessDetails] = useState(null);
+
+  const { isProcessing, activePlan, handleCheckout } = useRazorpayCheckout();
+
+  const handlePlanSelect = (plan) => {
+    handleCheckout({
+      plan,
+      billingCycle,
+      currency,
+      user,
+      onSuccess: (details) => {
+        setSuccessDetails(details);
+      },
+    });
+  };
+
+  const proPlan = PLAN_TIERS.find((p) => p.id === 'pro') || PLAN_TIERS[1];
 
   return (
     <div className="py-8 md:py-14 max-w-7xl mx-auto px-2 sm:px-4 space-y-12 animate-in fade-in duration-300">
+      
       {/* =================================================================== */}
       {/* HERO HEADER & TITLE                                                 */}
       {/* =================================================================== */}
@@ -42,9 +64,10 @@ export default function Upgrade() {
         </p>
 
         {/* =============================================================== */}
-        {/* BILLING CYCLE SWITCHER                                          */}
+        {/* BILLING CYCLE & DUAL CURRENCY SWITCHERS                         */}
         {/* =============================================================== */}
-        <div className="pt-4 flex items-center justify-center">
+        <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+          {/* Monthly vs Annual */}
           <div className="inline-flex items-center p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-inner">
             <button
               type="button"
@@ -72,6 +95,40 @@ export default function Upgrade() {
               </span>
             </button>
           </div>
+
+          {/* Currency Toggle (INR ₹ vs USD $) */}
+          <div className="inline-flex items-center p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-inner">
+            <button
+              type="button"
+              onClick={() => setCurrency('INR')}
+              className={`flex items-center gap-1 px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                currency === 'INR'
+                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <span>₹ INR</span>
+              <span className="text-[9px] px-1 py-0.2 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-bold">UPI</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrency('USD')}
+              className={`flex items-center gap-1 px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                currency === 'USD'
+                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <span>$ USD</span>
+              <span className="text-[9px] text-slate-400 font-mono">Global</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Payment Methods Pill */}
+        <div className="flex items-center justify-center gap-2 pt-1 text-[11px] text-slate-400">
+          <CreditCard className="w-3.5 h-3.5 text-blue-500" />
+          <span>Powered by <strong>Razorpay</strong> • UPI (GPay, PhonePe, Paytm), NetBanking & All Cards Accepted</span>
         </div>
       </div>
 
@@ -84,7 +141,11 @@ export default function Upgrade() {
             key={plan.id}
             plan={plan}
             billingCycle={billingCycle}
+            currency={currency}
             user={user}
+            onSelectPlan={handlePlanSelect}
+            isProcessing={isProcessing}
+            isCurrentPlan={activePlan === plan.id}
           />
         ))}
       </div>
@@ -110,10 +171,10 @@ export default function Upgrade() {
             <Lock className="w-5 h-5" />
           </div>
           <h4 className="text-xs font-bold text-slate-900 dark:text-white">
-            Bank-Grade 256-Bit Stripe Security
+            Bank-Grade 256-Bit Razorpay Security
           </h4>
           <p className="text-[11px] text-slate-500 max-w-xs">
-            All checkouts encrypted via Stripe. Cancel anytime with a single click.
+            PCI-DSS Level 1 compliant checkout. Supports UPI, Netbanking, Cards & EMI. Cancel anytime.
           </p>
         </div>
 
@@ -152,19 +213,25 @@ export default function Upgrade() {
             Join thousands of software engineers practicing with PrepSmart AI. Start free or upgrade for unlimited high-pressure mock rounds.
           </p>
           <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
-            <a
-              href="https://buy.stripe.com/test_28o9EjbkvgfQ8VOeUV"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Button
+              type="button"
+              disabled={isProcessing || activePlan === 'pro'}
+              onClick={() => handlePlanSelect(proPlan)}
+              className="px-6 py-5 rounded-2xl bg-white text-blue-600 hover:bg-blue-50 font-bold text-xs shadow-lg gap-2 cursor-pointer transition-all hover:scale-105"
             >
-              <Button className="px-6 py-5 rounded-2xl bg-white text-blue-600 hover:bg-blue-50 font-bold text-xs shadow-lg gap-2 cursor-pointer">
-                <span>Upgrade to Pro Candidate</span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </a>
+              <span>{activePlan === 'pro' ? 'Pro Candidate Active' : 'Upgrade to Pro Candidate'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* Payment Success & Receipt Modal */}
+      <PaymentSuccessModal
+        isOpen={Boolean(successDetails)}
+        onClose={() => setSuccessDetails(null)}
+        details={successDetails}
+      />
     </div>
   );
 }

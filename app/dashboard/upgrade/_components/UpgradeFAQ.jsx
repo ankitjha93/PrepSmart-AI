@@ -20,7 +20,7 @@ export default function UpgradeFAQ() {
     },
     {
       q: 'Is my payment processed securely?',
-      a: 'All transactions are handled directly through Stripe’s bank-grade 256-bit encrypted checkout. We never store or transmit your raw credit card numbers or banking information on our servers.',
+      a: 'All transactions are handled directly through Razorpay’s PCI-DSS Level 1 bank-grade 256-bit encrypted gateway. We support UPI (Google Pay, PhonePe, Paytm, BHIM), NetBanking, Credit/Debit Cards, and International Cards. We never store or transmit your raw payment credentials on our servers.',
     },
     {
       q: 'Can I export my mock evaluations and audio performance reports?',

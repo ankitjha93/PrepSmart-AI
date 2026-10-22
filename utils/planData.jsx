@@ -1,6 +1,7 @@
 /**
  * PrepSmart AI - Pricing & Plan Data
- * Multi-tier career acceleration packages with monthly and annual billing rates.
+ * Multi-tier career acceleration packages with monthly and annual billing rates
+ * supporting dual currencies (INR ₹ for Indian candidates with UPI/Cards, and USD $ for global candidates).
  */
 
 export const PLAN_TIERS = [
@@ -13,7 +14,10 @@ export const PLAN_TIERS = [
     popular: false,
     badgeText: 'Free Forever',
     ctaText: 'Current Plan',
-    paymentLink: null,
+    pricing: {
+      USD: { monthly: 0, annual: 0, symbol: '$' },
+      INR: { monthly: 0, annual: 0, symbol: '₹' },
+    },
     features: [
       { text: '3 Full AI Mock Interview Rounds', included: true },
       { text: 'Ollama Llama 3.3 Core Evaluation', included: true },
@@ -36,7 +40,10 @@ export const PLAN_TIERS = [
     popular: true,
     badgeText: 'Most Popular',
     ctaText: 'Upgrade to Pro',
-    paymentLink: 'https://buy.stripe.com/test_28o9EjbkvgfQ8VOeUV',
+    pricing: {
+      USD: { monthly: 14, annual: 11, symbol: '$' },
+      INR: { monthly: 899, annual: 699, symbol: '₹' },
+    },
     features: [
       { text: 'Unlimited AI Mock Interview Rounds', included: true },
       { text: 'Ollama Llama 3.3 Local & Cloud Inference', included: true },
@@ -59,7 +66,10 @@ export const PLAN_TIERS = [
     popular: false,
     badgeText: 'Senior & Staff',
     ctaText: 'Get Executive Access',
-    paymentLink: 'https://buy.stripe.com/test_28o9EjbkvgfQ8VOeUV',
+    pricing: {
+      USD: { monthly: 29, annual: 22, symbol: '$' },
+      INR: { monthly: 1899, annual: 1499, symbol: '₹' },
+    },
     features: [
       { text: 'Everything Included in Pro Candidate', included: true },
       { text: 'Company-Specific Rubrics (Google, Meta, Netflix)', included: true },
