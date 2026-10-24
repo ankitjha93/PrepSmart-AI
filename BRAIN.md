@@ -14,6 +14,7 @@ Welcome to the central knowledge repository for **PrepSmart AI**. This document 
 - **Multimodal Voice Interviewing**: Records audio/video in real-time in the browser and transcribes spoken responses with Gemini multimodal audio processing.
 - **Strict 5-Tier Evaluation Rubric**: Employs Principal Hiring Bar Raiser standards (1–10 scale) with instant evasive-answer filtering and constructive STAR-framework coaching.
 - **Resume ATS Scanner**: Evaluates resume text against job descriptions, computes match percentages, extracts project highlights, and generates tailored behavioral/technical interview questions.
+- **Secure Supabase Infrastructure**: Uses Supabase SSR for session/auth handling, PostgreSQL persistence, and Row Level Security.
 
 ---
 
@@ -23,15 +24,15 @@ Welcome to the central knowledge repository for **PrepSmart AI**. This document 
 ┌─────────────────────────────────────────────────────────────┐
 │                       Client Layer                          │
 │  Next.js 14 (App Router) + React 18 + Tailwind CSS + Lucide │
-│  Clerk Auth + WebRTC Camera/Mic + Sonner Toast Notifications │
+│  Supabase AuthContext + WebRTC Audio/Video + Sonner Toast   │
 └──────────────┬───────────────────────────────┬──────────────┘
                │                               │
        (API Fetch Requests)            (Protected Routes)
                │                               │
                ▼                               ▼
 ┌──────────────────────────────┐ ┌─────────────────────────────┐
-│       Next.js API Layer      │ │       Clerk Middleware      │
-│  /api/ollama/* routes        │ │  Session & User Management  │
+│       Next.js API Layer      │ │   Supabase SSR Middleware   │
+│  /api/ollama/* routes        │ │  Session & User Validation  │
 │  /api/market-demand          │ └─────────────────────────────┘
 │  /api/razorpay               │
 └──────────────┬───────────────┘
@@ -48,8 +49,8 @@ Welcome to the central knowledge repository for **PrepSmart AI**. This document 
                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                    Persistence Layer                        │
-│   Neon PostgreSQL / Supabase + Drizzle ORM                  │
-│   Tables: mockInterview, userAnswer                         │
+│   Supabase PostgreSQL (Tables: mockInterview, userAnswer)  │
+│   RLS Security Policies + Universal PostgREST Client        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -59,8 +60,8 @@ Welcome to the central knowledge repository for **PrepSmart AI**. This document 
 | **Language** | Modern JavaScript (ES Modules, JSX) |
 | **Styling** | [Tailwind CSS 3](https://tailwindcss.com/), `tailwind-merge`, `tailwindcss-animate` |
 | **UI Components** | Radix UI primitives (`dialog`, `collapsible`, `slot`), Lucide Icons |
-| **Authentication** | [Clerk](https://clerk.com/) (`@clerk/nextjs`) |
-| **Database & ORM** | PostgreSQL ([Neon Serverless](https://neon.tech/) / [Supabase](https://supabase.com/)), [Drizzle ORM](https://orm.drizzle.team/) |
+| **Authentication** | [Supabase Auth](https://supabase.com/) (`@supabase/ssr`, `context/AuthContext.jsx`) |
+| **Database & ORM** | [Supabase PostgreSQL](https://supabase.com/), [Drizzle ORM](https://orm.drizzle.team/), `utils/db.js` PostgREST client |
 | **Speech & Audio** | Browser MediaRecorder (`audio/webm`), Google Gemini Multimodal Audio STT |
 | **Testing** | [Playwright](https://playwright.dev/) End-to-End Test Suite |
 
@@ -100,11 +101,11 @@ flowchart TD
 ### 4.1 Dynamic Question Generation
 - **Entropy Ingestion**: Every generation request receives an entropy seed (`${Date.now()}-${uuidv4().slice(0, 8)}`).
 - **Scenario Archetypes**: Prompt rotates across 5 distinct engineering scenarios:
-  1. High-severity production latency spikes and telemetry diagnosis.
-  2. Scale trade-offs, network partitions, and state synchronization.
-  3. Language runtime internals (event loop, heap profiling, memory leaks).
-  4. Data consistency, connection pool exhaustion, and race conditions.
-  5. Architecture refactoring and technical migration trade-offs.
+  1. High-severity production incidents, latency spikes & thread pool exhaustion.
+  2. Scale trade-offs, network partitions & state synchronization.
+  3. Language & framework runtime internals (memory leaks, heap profiling, event loop).
+  4. Data consistency, connection pool starvation & race conditions.
+  5. Architecture migrations & technical debt refactoring under deadline pressure.
 - **Anti-Trivia Constraint**: Explicitly bans textbook "What is X?" questions in favor of real-world engineering challenges.
 
 ### 4.2 Calibrated 5-Tier Evaluation Matrix
@@ -129,34 +130,42 @@ Evaluations grade candidate answers on an objective 1–10 scale:
 
 ```
 ├── app/
-│   ├── (auth)/                # Clerk sign-in / sign-up routes
-│   ├── actions/               # Server actions (resume upload, etc.)
+│   ├── (auth)/                # Supabase sign-in, sign-up, reset-password
+│   ├── actions/               # Server actions (file uploads, resume parsers)
 │   ├── api/
 │   │   ├── interview/         # Interview management endpoints
-│   │   ├── market-demand/     # Real-time job market tech insights
+│   │   ├── market-demand/     # Live industry tech stack insights
 │   │   ├── ollama/
-│   │   │   ├── evaluate/      # 5-tier answer evaluation route
-│   │   │   ├── generate/      # Dynamic question generation route
-│   │   │   ├── resume/        # Resume ATS scanning route
-│   │   │   ├── status/        # AI engine health check route
-│   │   │   └── transcribe/    # Multimodal speech-to-text route
-│   │   └── razorpay/          # Payment verification & subscription tiers
-│   ├── dashboard/             # Core authenticated app portal
+│   │   │   ├── evaluate/      # 5-tier calibrated evaluation API
+│   │   │   ├── generate/      # Dynamic question generation API
+│   │   │   ├── resume/        # Resume ATS scanning & questions API
+│   │   │   ├── status/        # AI engine diagnostic health API
+│   │   │   └── transcribe/    # Multimodal speech-to-text API
+│   │   └── razorpay/          # Payment order creation & webhook handlers
+│   ├── auth/
+│   │   └── callback/          # Supabase auth OAuth/email callback handler
+│   ├── dashboard/             # Authenticated user dashboard
 │   │   ├── _components/       # AddNewInterview, InterviewList, etc.
-│   │   ├── interview/         # Mock interview recording & feedback UI
-│   │   ├── resume-scanner/    # ATS analyzer interface
-│   │   ├── upgrade/           # Pro plan pricing & payments
-│   │   └── page.jsx           # Main user dashboard
-│   ├── layout.js              # Root application layout with ClerkProvider
+│   │   ├── interview/         # Live mock interview & recording room
+│   │   ├── resume-scanner/    # ATS scanner & project insights UI
+│   │   ├── upgrade/           # Pro plan pricing & subscription portal
+│   │   └── page.jsx           # Main user dashboard overview
+│   ├── layout.js              # Root application layout with AuthProvider & ThemeProvider
 │   └── page.js                # High-conversion public landing page
+├── context/
+│   └── AuthContext.jsx        # Client-side Supabase Auth state manager
 ├── utils/
-│   ├── cloudAI.js             # Google Gemini Cloud AI service & STT
-│   ├── OllamaAIModal.js       # Client-side AI service orchestrator
-│   ├── db.js                  # Drizzle ORM client connection
-│   └── schema.js              # PostgreSQL database table definitions
-├── AGENTS.md                  # Autonomous agent workflow rules & git habits
-├── BRAIN.md                   # This document
-└── drizzle.config.js          # Drizzle Kit configuration
+│   ├── cloudAI.js             # Google Gemini Cloud AI service & multimodal STT
+│   ├── OllamaAIModal.js       # Client-side AI orchestrator & fallback router
+│   ├── db.js                  # Drizzle ORM / PostgREST universal database client
+│   ├── schema.js              # Database table definitions
+│   └── supabase/              # Supabase browser, server, and middleware clients
+├── tests/                     # Playwright E2E integration test suites
+├── AGENTS.md                  # Autonomous agent rules & git push habits
+├── BRAIN.md                   # Architectural manifesto & engineering knowledge base
+├── supabase_schema.sql        # Supabase database schema & RLS definitions
+├── drizzle.config.js          # Drizzle Kit migration configuration
+└── package.json               # Scripts & dependencies
 ```
 
 ---
@@ -171,50 +180,49 @@ Stores generated interview sessions.
 - `jobPosition`: Target job title (e.g. *Staff Full Stack Engineer*).
 - `jobDesc`: Tech stack keywords and job description context.
 - `jobExperience`: Years of required experience.
-- `createdBy`: User email from Clerk session.
+- `createdBy`: User email from Supabase Auth session.
 - `createdAt`: Timestamp string.
 
 ### Table: `userAnswer`
 Stores user responses and grading metrics.
 - `id`: Serial primary key.
-- `mockIdRef`: Foreign identifier matching `mockInterview.mockId`.
+- `mockIdRef` / `mockId`: Foreign identifier matching `mockInterview.mockId`.
 - `question`: The specific interview question presented.
 - `correctAns`: Ideal benchmark answer generated by AI.
 - `userAns`: Candidate's transcribed or submitted response.
 - `feedback`: AI-generated constructive critique and improvement steps.
 - `rating`: Calibrated score (1 to 10).
-- `userEmail`: User email from Clerk session.
+- `userEmail`: User email from Supabase Auth session.
 - `createdAt`: Timestamp string.
 
 ---
 
 ## 7. Environment Variables Configuration
 
-Create a `.env.local` file with the following keys:
+Create a `.env.local` file by copying from `.env.example`:
 
 ```bash
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
+# 1. Supabase Database & Auth (https://supabase.com)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-placeholder
+DATABASE_URL=postgresql://postgres:your-db-password@db.your-project-id.supabase.co:5432/postgres
 
-# Database (Neon / Supabase PostgreSQL)
-NEXT_PUBLIC_DRIZZLE_DB_URL=postgresql://user:password@ep-host.region.neon.tech/neondb?sslmode=require
-
-# Google Gemini API (Cloud Fallback & Audio STT)
-GEMINI_API_KEY=AQ.Ab8RN6... # Or standard AI Studio API key
-NEXT_PUBLIC_GEMINI_API_KEY=AQ.Ab8RN6...
-
-# Local Ollama AI (Optional for local inference)
+# 2. Ollama Local AI Engine (Optional - https://ollama.com)
 OLLAMA_BASE_URL=http://127.0.0.1:11434
 OLLAMA_MODEL=llama3.3
+NEXT_PUBLIC_OLLAMA_MODEL=llama3.3
 
-# Razorpay Payments (Optional for subscriptions)
-RAZORPAY_KEY_ID=rzp_test_...
-RAZORPAY_KEY_SECRET=...
+# 3. Google Gemini Cloud AI (Free - https://aistudio.google.com)
+NEXT_PUBLIC_GEMINI_API_KEY=your-gemini-api-key-here
+GEMINI_API_KEY=your-gemini-api-key-here
+
+# 4. Application Settings
+NEXT_PUBLIC_INTERVIEW_QUESTION_COUNT=5
+NEXT_PUBLIC_QUESTION_NOTE=Click on Record Answer when you want to answer the question. At the end of the interview we will give you the feedback along with correct answer for each question and your answer to compare it.
+
+# 5. Razorpay Payment Gateway (Optional - https://dashboard.razorpay.com)
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_your_key_id_here
+RAZORPAY_KEY_SECRET=your_key_secret_here
 ```
 
 ---
