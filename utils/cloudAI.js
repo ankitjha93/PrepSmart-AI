@@ -43,7 +43,12 @@ export const CloudAIService = {
           generationConfig: options.generationConfig || {},
         });
 
-        const result = await model.generateContent(promptOrParts);
+        const timeoutMs = options.timeoutMs || 25000;
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error(`Timeout waiting for ${modelName}`)), timeoutMs)
+        );
+
+        const result = await Promise.race([contentPromise, timeoutPromise]);
         const response = await result.response;
         return {
           text: response.text(),
@@ -62,30 +67,47 @@ export const CloudAIService = {
    * Evaluate candidate interview answer using Gemini
    */
   evaluateAnswer: async ({ question, correctAnswer, userAnswer }) => {
-    const evaluationPrompt = `You are a Senior Staff Interviewer evaluating a candidate's answer during a technical mock interview.
+    const trimmedAnswer = (userAnswer || "").trim();
+
+    // Catch trivial or completely evasive answers immediately
+    const isEvasive = /\b(i don['’]?t know|no idea|no clue|dunno|not sure|have no idea|pass|skip|don['’]?t remember|cannot answer|can['’]?t answer)\b/i.test(trimmedAnswer) ||
+      /^(hello|hi|yes|no|ok|test|random|asdf|\?|\.)$/i.test(trimmedAnswer);
+    if (trimmedAnswer.length < 8 || isEvasive) {
+      return {
+        success: true,
+        engine: "gemini",
+        model: "gemini-3.5-flash",
+        rating: "1",
+        feedback: "The submitted answer did not attempt to address the technical concepts required by this question. In an interview, even if you are unsure of the complete solution, walk the interviewer through your foundational reasoning, related principles, and how you would investigate the problem rather than giving an evasive answer.",
+      };
+    }
+
+    const evaluationPrompt = `You are a Principal Hiring Bar Raiser and Senior Staff Interviewer evaluating a candidate's answer during a high-stakes technical mock interview.
 
 Interview Question: "${question}"
 Target Benchmark Answer / Key Concepts: "${correctAnswer}"
-Candidate's Transcribed / Submitted Answer: "${userAnswer}"
+Candidate's Transcribed / Submitted Answer: "${trimmedAnswer}"
+
+STRICT EVALUATION MATRIX:
+- 1 to 2 (Unacceptable): Irrelevant, evasive, nonsense, or trivial (fewer than 10 words without substance).
+- 3 to 4 (Superficial): Mentions relevant buzzwords but demonstrates fundamental misconceptions or lacks technical explanation.
+- 5 to 6 (Competent Junior/Mid): Explains the basic concept correctly, but misses key architectural trade-offs, performance nuances, or edge cases.
+- 7 to 8 (Strong Senior): Technically accurate, clearly articulates trade-offs, concrete engineering mechanics, and real-world considerations.
+- 9 to 10 (Staff/Principal Mastery): Flawless technical depth, addresses system scalability/memory/concurrency constraints, explains trade-offs, and provides concrete architectural examples.
 
 TASK:
-Evaluate the candidate's answer with technical rigor, precision, and fairness.
-Respond strictly in valid JSON format with two keys:
-1. "rating": An integer from 1 to 10 (1 = completely incorrect/evasive, 5 = superficial or partially correct, 8 = strong technical response, 10 = exceptional mastery with trade-offs).
-2. "feedback": 3 to 5 concise sentences providing constructive feedback. Explicitly state:
-   - What the candidate explained well
-   - Missing technical depth, overlooked trade-offs, or inaccuracies
-   - Specific actionable tips to reach a FAANG/Staff-level answer
+1. Objectively grade the candidate's answer against the target benchmark.
+2. Return strictly valid JSON with keys "rating" (integer 1-10) and "feedback" (3 to 5 constructive, concise sentences explaining strengths, specific missing concepts, and concrete steps to reach a 10/10 answer).
 
 JSON format:
 {
   "rating": 7,
-  "feedback": "Your explanation accurately addressed... However, you overlooked... To improve, make sure to..."
+  "feedback": "..."
 }`;
 
     const res = await CloudAIService.generateWithFallback(evaluationPrompt, {
       generationConfig: {
-        temperature: 0.3,
+        temperature: 0.2,
         topP: 0.9,
         responseMimeType: "application/json",
       },
@@ -109,41 +131,61 @@ JSON format:
   },
 
   /**
-   * Generate tailored interview questions using Gemini
+   * Generate tailored, non-repetitive interview questions using Gemini
    */
   generateQuestions: async ({
     jobPosition = "Full Stack Developer",
     jobDesc = "React, Node.js, Next.js, PostgreSQL",
     jobExperience = "3",
     questionCount = 5,
+    seed = null,
   }) => {
     const count = parseInt(questionCount, 10) || 5;
+    const entropySeed = seed || `${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
 
-    const systemPrompt = `You are a Principal Tech Interviewer and Staff Hiring Bar Raiser at a top tier technology firm.
-Your task is to generate realistic, in-depth technical and behavioral interview questions tailored strictly to the role, seniority, and tech stack provided.
+    const archetypes = [
+      "Real-world production incident or high-severity latency spike troubleshooting",
+      "Architectural trade-offs under high scale, network partitions, and state synchronization",
+      "Deep framework or language runtime internals (memory management, event loops, garbage collection pauses)",
+      "Data consistency, database indexing strategies, connection pool exhaustion, and race conditions",
+      "Senior technical decision-making, legacy architecture migration, and performance refactoring",
+    ];
+    // Dynamic archetype selection
+    const selectedArchetypes = archetypes.sort(() => 0.5 - Math.random()).slice(0, count);
 
+    const systemPrompt = `You are a Principal Tech Interviewer and Staff Bar Raiser at a tier-1 technology firm (Google, Meta, Stripe).
+Your task is to generate ${count} FRESH, HIGHLY DYNAMIC, SCENARIO-BASED technical interview questions tailored strictly to the role, seniority, and tech stack provided.
+
+Session Entropy: ${entropySeed}
 Role: ${jobPosition}
 Technologies & Context: ${jobDesc}
 Years of Experience: ${jobExperience} Years
 Number of Questions: ${count}
 
-CRITICAL RULES:
-1. Return strictly a JSON array containing exactly ${count} objects.
-2. Each object must contain exactly two keys: "question" (string) and "answer" (string).
-3. The "answer" should be a comprehensive model response highlighting key architectural principles, trade-offs, and expected candidate answers.
-4. Do NOT wrap your output in markdown backticks or commentary. Output raw valid JSON.
+DIVERSITY & SCENARIO GUIDELINES:
+Cover the following distinct engineering scenarios across the questions:
+${selectedArchetypes.map((a, i) => `${i + 1}. ${a}`).join("\n")}
+
+CRITICAL INSTRUCTIONS:
+1. DO NOT generate generic textbook trivia or repeat common boilerplate definitions (avoid "What is X?").
+2. Frame every question around realistic engineering challenges, real-world systems, and concrete trade-offs.
+3. Every question must be distinct and specific to this unique session (${entropySeed}).
+4. Return strictly a JSON array containing exactly ${count} objects.
+5. Each object must contain exactly two keys: "question" (string) and "answer" (string).
+6. The "answer" should be a comprehensive model response highlighting key architectural principles and trade-offs.
+7. Do NOT wrap your output in markdown backticks or commentary. Output raw valid JSON.
 
 JSON Schema format:
 [
   {
-    "question": "Question text here...",
+    "question": "Scenario question text here...",
     "answer": "Expected comprehensive model answer here..."
   }
 ]`;
 
     const res = await CloudAIService.generateWithFallback(systemPrompt, {
       generationConfig: {
-        temperature: 0.7,
+        temperature: 0.85,
         topP: 0.95,
         responseMimeType: "application/json",
       },

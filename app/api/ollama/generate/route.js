@@ -13,28 +13,47 @@ export async function POST(req) {
       jobExperience = '3',
       questionCount = 5,
       model = defaultModel,
+      seed = null,
     } = body;
 
     const count = parseInt(questionCount, 10) || 5;
+    const entropySeed = seed || `${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
 
-    const systemPrompt = `You are a Principal Tech Interviewer and Staff Hiring Bar Raiser at a top tier technology firm.
-Your task is to generate realistic, in-depth technical and behavioral interview questions tailored strictly to the role, seniority, and tech stack provided.
+    const archetypes = [
+      "Production outage troubleshooting and distributed latency root-cause analysis",
+      "Scalability design trade-offs under high concurrency, memory limits, and network partitions",
+      "Deep framework or language runtime internals (event loop microtasks, memory profiling, garbage collection)",
+      "Database indexing, isolation levels, connection pooling, and race condition prevention",
+      "High-stakes engineering trade-offs, architecture migration, and code refactoring",
+    ];
+    const selectedArchetypes = archetypes.sort(() => 0.5 - Math.random()).slice(0, count);
 
+    const systemPrompt = `You are a Principal Tech Interviewer and Staff Bar Raiser at a tier-1 technology firm (Google, Meta, Stripe).
+Your task is to generate ${count} FRESH, HIGHLY DYNAMIC, SCENARIO-BASED technical interview questions tailored strictly to the role, seniority, and tech stack provided.
+
+Session Entropy: ${entropySeed}
 Role: ${jobPosition}
 Technologies & Context: ${jobDesc}
 Years of Experience: ${jobExperience} Years
 Number of Questions: ${count}
 
-CRITICAL RULES:
-1. Return strictly a JSON array containing exactly ${count} objects.
-2. Each object must contain exactly two keys: "question" (string) and "answer" (string).
-3. The "answer" should be a comprehensive model response highlighting key architectural principles, trade-offs, and expected candidate answers.
-4. Do NOT wrap your output in markdown backticks or commentary. Output raw valid JSON.
+DIVERSITY & SCENARIO GUIDELINES:
+Cover the following distinct engineering scenarios across the questions:
+${selectedArchetypes.map((a, i) => `${i + 1}. ${a}`).join("\n")}
+
+CRITICAL INSTRUCTIONS:
+1. DO NOT generate repetitive, generic textbook trivia or repeat common boilerplate definitions (avoid "What is X?").
+2. Frame every question around realistic engineering challenges, real-world systems, and concrete trade-offs.
+3. Every question must be distinct and specific to this unique session (${entropySeed}).
+4. Return strictly a JSON array containing exactly ${count} objects.
+5. Each object must contain exactly two keys: "question" (string) and "answer" (string).
+6. The "answer" should be a comprehensive model response highlighting key architectural principles and trade-offs.
+7. Do NOT wrap output in markdown backticks or commentary. Output raw valid JSON.
 
 JSON Schema format:
 [
   {
-    "question": "Question text here...",
+    "question": "Scenario question text here...",
     "answer": "Expected comprehensive model answer here..."
   }
 ]`;
@@ -59,8 +78,8 @@ JSON Schema format:
           stream: false,
           format: 'json',
           options: {
-            temperature: 0.7,
-            top_p: 0.9,
+            temperature: 0.85,
+            top_p: 0.95,
           },
         }),
       });
@@ -102,6 +121,7 @@ JSON Schema format:
             jobDesc,
             jobExperience,
             questionCount: count,
+            seed: entropySeed,
           });
           if (cloudRes && Array.isArray(cloudRes.questions) && cloudRes.questions.length > 0) {
             parsedQuestions = cloudRes.questions;
@@ -113,32 +133,42 @@ JSON Schema format:
       }
     }
 
-    // Fallback high-quality questions tailored to the position if Ollama returned error or is offline
+    // Dynamic randomized fallback question bank (ensuring zero repetition even when fully offline)
     if (!parsedQuestions || parsedQuestions.length === 0) {
-      const fallbackQuestions = [
+      const comprehensiveBank = [
         {
-          question: `In modern ${jobPosition || 'Software'} engineering, what core architectural trade-offs do you evaluate when building scalable systems with ${jobDesc || 'modern stacks'}, and how do you prevent performance bottlenecks?`,
-          answer: `Explain separation of concerns, distributed caching layers (Redis/CDN), choosing appropriate state synchronization, and database indexing strategies under high concurrent throughput.`
+          question: `In modern ${jobPosition || 'Software'} engineering, walk me through an unexpected production latency spike or thread pool exhaustion you diagnosed in a system built with ${jobDesc || 'modern stacks'}. What telemetry metrics and profiling steps led you to root cause?`,
+          answer: `The candidate should structure their explanation using the STAR framework, detailing APM profiling, flame graphs, database slow query logs with EXPLAIN ANALYZE, event-loop lag metrics, and preventative architectural safeguards like circuit breakers and bulkheads.`
         },
         {
-          question: `How do you approach diagnostic troubleshooting and root-cause analysis when an unexpected production latency spike or memory leak occurs?`,
-          answer: `Use profiling tools, inspect thread/event loops, examine slow query logs with EXPLAIN ANALYZE, analyze metrics (CPU, RAM, garbage collection pauses), and implement structured logging and canary deployments.`
+          question: `When designing data persistence and caching layers for ${jobDesc || 'distributed backends'}, how do you handle cache invalidation, cache stampedes (thundering herd), and dual-write consistency between your primary database and memory caches?`,
+          answer: `Explain probabilistic early expiration (XFetch), mutex locking/single-flight requests for cache stampedes, write-through vs cache-aside patterns, change data capture (Debezium/Kafka) for transactional consistency, and idempotency keys.`
         },
         {
-          question: `Describe your strategy for securing application data, token rotation, and mitigating threats such as XSS, CSRF, or SQL injection.`,
-          answer: `Highlight HttpOnly SameSite cookie configurations, automated JSX escaping, parameterized queries/ORMs, Content Security Policy (CSP), and zero-trust API authorization.`
+          question: `How do you architect state management and data hydration in ${jobPosition || 'web applications'} without introducing race conditions, stale closures, or client-server hydration mismatches?`,
+          answer: `Contrast server-side streaming and Suspense boundaries with client store initialization, explain state factory patterns per request to prevent cross-request leakage, and detail optimistic rollback handlers.`
         },
         {
-          question: `Describe how asynchronous tasks, microtasks, and event reconciliation interact under heavy user interaction.`,
-          answer: `Detail Promise microtask queues versus macrotask timers, batched UI updates, debouncing/throttling, and lifecycle clean-ups to prevent stale closures and memory leaks.`
+          question: `Describe a situation where you had to champion a major technical migration or refactor for a ${jobPosition || 'developer'} initiative under strict deadline pressure. What trade-offs did you evaluate?`,
+          answer: `Follow the STAR method: quantify business metrics (latency drop, developer velocity, error rate), explain the Strangler Fig pattern for zero-downtime cutover, and outline automated regression tests.`
         },
         {
-          question: `Tell me about a high-stakes technical deadline or architecture migration you led for a ${jobPosition || 'developer'} role, and how you ensured system resilience.`,
-          answer: `Structure response using the STAR method (Situation, Task, Action, Result). Quantify measurable impact (e.g. 40% latency reduction, 99.99% uptime) and explain post-mortem preventative safeguards.`
+          question: `How do you secure modern APIs and frontends against sophisticated attack vectors beyond basic input validation (e.g., SSRF, JWT replay attacks, prototype pollution, and timing attacks)?`,
+          answer: `Discuss ephemeral short-lived access tokens with HttpOnly SameSite refresh cookies, cryptographic signature verification, Content Security Policy (CSP), rate limiting, and zero-trust internal network service meshes.`
+        },
+        {
+          question: `Suppose your application experiences memory leaks or unbounded garbage collection pauses under sustained peak throughput. How do you profile the heap and identify whether closures, unclosed sockets, or cache accumulation are responsible?`,
+          answer: `Detail taking heap snapshots, comparing baseline vs retained memory, inspecting detached DOM nodes or lingering event listeners, tuning GC parameters, and using stream-based processing for large payloads.`
+        },
+        {
+          question: `In high-throughput microservices using ${jobDesc || 'modern architectures'}, how do you prevent cascading failures across services during dependent API downtime?`,
+          answer: `Detail timeout budgets, exponential backoff with full jitter, circuit breaker states (closed, open, half-open), dead letter queues, and graceful degradation returning cached or partial payloads.`
         }
       ];
 
-      parsedQuestions = fallbackQuestions.slice(0, count);
+      // Shuffle and pick fresh questions every time
+      parsedQuestions = comprehensiveBank.sort(() => 0.5 - Math.random()).slice(0, count);
+      usedEngine = 'dynamic-fallback';
     }
 
     // Normalize items
@@ -150,7 +180,7 @@ JSON Schema format:
     return NextResponse.json({
       success: true,
       engine: usedEngine,
-      model: usedEngine.includes('gemini') ? 'gemini-2.0-flash' : model,
+      model: usedEngine.includes('gemini') ? 'gemini-3.5-flash' : model,
       count: normalized.length,
       questions: normalized,
       rawJson: JSON.stringify(normalized),

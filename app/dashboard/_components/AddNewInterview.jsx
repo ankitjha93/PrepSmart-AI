@@ -209,14 +209,15 @@ function AddNewInterview() {
 
     try {
       const count = questionCount || process.env.NEXT_PUBLIC_INTERVIEW_QUESTION_COUNT || 5;
-      toast.loading(`Synthesizing questions via Ollama (${ollamaInfo.model || 'llama3.2'})...`);
+      toast.loading(`Synthesizing tailored questions with AI...`);
 
       const genRes = await OllamaService.generateQuestions({
         jobPosition,
         jobDesc,
         jobExperience,
         questionCount: count,
-        model: ollamaInfo.model || 'llama3.2',
+        model: ollamaInfo.model || 'llama3.3',
+        seed: `${Date.now()}-${uuidv4().slice(0, 8)}`,
       });
       toast.dismiss();
 

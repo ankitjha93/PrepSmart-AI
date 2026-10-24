@@ -19,7 +19,7 @@ export const OllamaService = {
   /**
    * Generate interview questions for a given position and tech stack
    */
-  generateQuestions: async ({ jobPosition, jobDesc, jobExperience, questionCount = 5, model }) => {
+  generateQuestions: async ({ jobPosition, jobDesc, jobExperience, questionCount = 5, model, seed }) => {
     const res = await fetch('/api/ollama/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -29,6 +29,7 @@ export const OllamaService = {
         jobExperience,
         questionCount,
         model,
+        seed: seed || `${Date.now()}-${Math.floor(Math.random() * 1000000)}`,
       }),
     });
 

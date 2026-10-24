@@ -14,27 +14,43 @@ export async function POST(req) {
       model = defaultModel,
     } = body;
 
-    if (!userAnswer || userAnswer.trim().length === 0) {
+    const trimmedAnswer = (userAnswer || '').trim();
+    if (!trimmedAnswer || trimmedAnswer.length === 0) {
       return NextResponse.json({
         success: false,
         error: 'Candidate answer is required for evaluation',
       }, { status: 400 });
     }
 
-    const evaluationPrompt = `You are a Senior Staff Interviewer evaluating a candidate's answer during a technical mock interview.
+    // Catch trivial or completely evasive answers immediately
+    const isEvasive = /\b(i don['’]?t know|no idea|no clue|dunno|not sure|have no idea|pass|skip|don['’]?t remember|cannot answer|can['’]?t answer)\b/i.test(trimmedAnswer) ||
+      /^(hello|hi|yes|no|ok|test|random|asdf|\?|\.)$/i.test(trimmedAnswer);
+    if (trimmedAnswer.length < 8 || isEvasive) {
+      return NextResponse.json({
+        success: true,
+        engine: 'instant-validator',
+        model: 'evaluator',
+        rating: '1',
+        feedback: 'The submitted response did not attempt to address the technical concepts required by this question. In an interview, walk through your foundational reasoning, related principles, and how you would investigate the problem rather than giving an evasive answer.',
+      });
+    }
+
+    const evaluationPrompt = `You are a Principal Hiring Bar Raiser and Senior Staff Interviewer evaluating a candidate's answer during a high-stakes technical mock interview.
 
 Interview Question: "${question}"
 Target Benchmark Answer / Key Concepts: "${correctAnswer}"
-Candidate's Transcribed / Submitted Answer: "${userAnswer}"
+Candidate's Transcribed / Submitted Answer: "${trimmedAnswer}"
+
+STRICT EVALUATION MATRIX:
+- 1 to 2 (Unacceptable): Irrelevant, evasive, nonsense, or trivial (fewer than 10 words without substance).
+- 3 to 4 (Superficial): Mentions relevant buzzwords but demonstrates fundamental misconceptions or lacks technical explanation.
+- 5 to 6 (Competent Junior/Mid): Explains the basic concept correctly, but misses key architectural trade-offs, performance nuances, or edge cases.
+- 7 to 8 (Strong Senior): Technically accurate, clearly articulates trade-offs, concrete engineering mechanics, and real-world considerations.
+- 9 to 10 (Staff/Principal Mastery): Flawless technical depth, addresses system scalability/memory/concurrency constraints, explains trade-offs, and provides concrete architectural examples.
 
 TASK:
-Evaluate the candidate's answer with technical rigor, precision, and fairness.
-Respond strictly in valid JSON format with two keys:
-1. "rating": An integer from 1 to 10 (1 = completely incorrect/evasive, 5 = superficial or partially correct, 8 = strong technical response, 10 = exceptional mastery with trade-offs).
-2. "feedback": 3 to 5 concise sentences providing constructive feedback. Explicitly state:
-   - What the candidate explained well
-   - Missing technical depth, overlooked trade-offs, or inaccuracies
-   - Specific actionable tips to reach a FAANG/Staff-level answer
+1. Objectively grade the candidate's answer against the target benchmark.
+2. Return strictly valid JSON with keys "rating" (integer 1-10) and "feedback" (3 to 5 constructive, concise sentences explaining strengths, specific missing concepts, and concrete steps to reach a 10/10 answer).
 
 JSON format:
 {
@@ -60,7 +76,7 @@ JSON format:
           stream: false,
           format: 'json',
           options: {
-            temperature: 0.3, // Lower temperature for consistent, objective evaluation
+            temperature: 0.2, // Low temperature for consistent, objective evaluation
             top_p: 0.9,
           },
         }),
@@ -84,7 +100,7 @@ JSON format:
           const cloudRes = await CloudAIService.evaluateAnswer({
             question,
             correctAnswer,
-            userAnswer,
+            userAnswer: trimmedAnswer,
           });
           if (cloudRes && cloudRes.feedback) {
             parsedResult = {
@@ -99,17 +115,19 @@ JSON format:
       }
     }
 
-    // Heuristic fallback if both Ollama and Cloud AI are offline
+    // Calibrated heuristic fallback if both Ollama and Cloud AI are offline
     if (!parsedResult || !parsedResult.feedback) {
-      const wordCount = userAnswer.trim().split(/\s+/).length;
-      let calculatedRating = 6;
-      if (wordCount > 60) calculatedRating = 8;
-      else if (wordCount > 30) calculatedRating = 7;
-      else if (wordCount < 15) calculatedRating = 5;
+      const wordCount = trimmedAnswer.split(/\s+/).length;
+      let calculatedRating = 5;
+      if (wordCount < 10 || isEvasive) calculatedRating = 1;
+      else if (wordCount < 25) calculatedRating = 3;
+      else if (wordCount < 50) calculatedRating = 6;
+      else if (wordCount < 90) calculatedRating = 8;
+      else calculatedRating = 9;
 
       parsedResult = {
         rating: calculatedRating,
-        feedback: `You communicated the core concept with clarity (${wordCount} words provided). To elevate this to a top-tier score, be sure to explicitly state architectural trade-offs, discuss real-world edge cases or memory constraints, and structure your answer using the STAR framework.`,
+        feedback: `You provided an overview (${wordCount} words). To elevate this to a top-tier score, be sure to explicitly state architectural trade-offs, discuss real-world edge cases or memory constraints, and structure your answer using the STAR framework.`,
       };
       usedEngine = 'heuristic-fallback';
     }
@@ -117,7 +135,7 @@ JSON format:
     return NextResponse.json({
       success: true,
       engine: usedEngine,
-      model: usedEngine.includes('gemini') ? 'gemini-2.0-flash' : model,
+      model: usedEngine.includes('gemini') ? 'gemini-3.5-flash' : model,
       rating: String(parsedResult.rating || '7'),
       feedback: parsedResult.feedback || 'Good attempt. Consider expanding on system trade-offs.',
     });
