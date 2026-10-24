@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { CloudAIService } from '@/utils/cloudAI';
 
 export async function POST(req) {
   const baseUrl = process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
@@ -41,11 +42,12 @@ JSON Schema format:
     // Attempt to call Ollama
     let rawText = '';
     let parsedQuestions = null;
+    let usedEngine = 'ollama';
 
     try {
       const controller = new AbortController();
-      // Allow 60 seconds for local model inference
-      const timeout = setTimeout(() => controller.abort(), 60000);
+      // Fast probe timeout for local Ollama so remote users don't wait 60 seconds
+      const timeout = setTimeout(() => controller.abort(), 4000);
 
       const ollamaRes = await fetch(`${baseUrl}/api/generate`, {
         method: 'POST',
@@ -82,14 +84,33 @@ JSON Schema format:
         } else if (parsed?.interview_questions && Array.isArray(parsed.interview_questions)) {
           parsedQuestions = parsed.interview_questions;
         } else if (parsed && typeof parsed === 'object') {
-          // If Ollama returned a single object with question & answer
           if (parsed.question && parsed.answer) {
             parsedQuestions = [parsed];
           }
         }
       }
     } catch (ollamaErr) {
-      console.warn('Ollama generation network/inference error:', ollamaErr.message);
+      console.warn('Ollama generation network/inference error (switching to Cloud AI):', ollamaErr.message);
+    }
+
+    // Cloud AI Fallback via Google Gemini (for remote users & deployed environments)
+    if (!parsedQuestions || parsedQuestions.length === 0) {
+      if (CloudAIService.isConfigured()) {
+        try {
+          const cloudRes = await CloudAIService.generateQuestions({
+            jobPosition,
+            jobDesc,
+            jobExperience,
+            questionCount: count,
+          });
+          if (cloudRes && Array.isArray(cloudRes.questions) && cloudRes.questions.length > 0) {
+            parsedQuestions = cloudRes.questions;
+            usedEngine = `gemini (${cloudRes.model})`;
+          }
+        } catch (cloudErr) {
+          console.warn('Cloud AI question generation fallback notice:', cloudErr.message);
+        }
+      }
     }
 
     // Fallback high-quality questions tailored to the position if Ollama returned error or is offline
@@ -128,7 +149,8 @@ JSON Schema format:
 
     return NextResponse.json({
       success: true,
-      model,
+      engine: usedEngine,
+      model: usedEngine.includes('gemini') ? 'gemini-2.0-flash' : model,
       count: normalized.length,
       questions: normalized,
       rawJson: JSON.stringify(normalized),

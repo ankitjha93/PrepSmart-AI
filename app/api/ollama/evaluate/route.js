@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { CloudAIService } from '@/utils/cloudAI';
 
 export async function POST(req) {
   const baseUrl = process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
@@ -42,10 +43,12 @@ JSON format:
 }`;
 
     let parsedResult = null;
+    let usedEngine = 'ollama';
 
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 45000);
+      // Fast timeout for local probe so remote users don't wait 45s
+      const timeout = setTimeout(() => controller.abort(), 3500);
 
       const ollamaRes = await fetch(`${baseUrl}/api/generate`, {
         method: 'POST',
@@ -71,10 +74,32 @@ JSON format:
         parsedResult = JSON.parse(raw);
       }
     } catch (ollamaErr) {
-      console.warn('Ollama evaluation inference error:', ollamaErr.message);
+      console.warn('Ollama evaluation inference error (switching to Cloud AI):', ollamaErr.message);
     }
 
-    // High quality fallback evaluation if Ollama local server was unreachable
+    // Cloud AI Fallback via Google Gemini (for remote users & deployed environments)
+    if (!parsedResult || !parsedResult.feedback) {
+      if (CloudAIService.isConfigured()) {
+        try {
+          const cloudRes = await CloudAIService.evaluateAnswer({
+            question,
+            correctAnswer,
+            userAnswer,
+          });
+          if (cloudRes && cloudRes.feedback) {
+            parsedResult = {
+              rating: cloudRes.rating,
+              feedback: cloudRes.feedback,
+            };
+            usedEngine = `gemini (${cloudRes.model})`;
+          }
+        } catch (cloudErr) {
+          console.warn('Cloud AI evaluation fallback notice:', cloudErr.message);
+        }
+      }
+    }
+
+    // Heuristic fallback if both Ollama and Cloud AI are offline
     if (!parsedResult || !parsedResult.feedback) {
       const wordCount = userAnswer.trim().split(/\s+/).length;
       let calculatedRating = 6;
@@ -86,11 +111,13 @@ JSON format:
         rating: calculatedRating,
         feedback: `You communicated the core concept with clarity (${wordCount} words provided). To elevate this to a top-tier score, be sure to explicitly state architectural trade-offs, discuss real-world edge cases or memory constraints, and structure your answer using the STAR framework.`,
       };
+      usedEngine = 'heuristic-fallback';
     }
 
     return NextResponse.json({
       success: true,
-      model,
+      engine: usedEngine,
+      model: usedEngine.includes('gemini') ? 'gemini-2.0-flash' : model,
       rating: String(parsedResult.rating || '7'),
       feedback: parsedResult.feedback || 'Good attempt. Consider expanding on system trade-offs.',
     });

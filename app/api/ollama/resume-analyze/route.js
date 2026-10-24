@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { CloudAIService } from '@/utils/cloudAI';
 
 export async function POST(req) {
   const baseUrl = process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
@@ -93,7 +94,25 @@ Do NOT include markdown formatting or commentary. Return only the JSON object.`;
         }
       }
     } catch (ollamaErr) {
-      console.warn('Ollama resume analysis inference warning:', ollamaErr.message);
+      console.warn('Ollama resume analysis inference warning (switching to Cloud AI):', ollamaErr.message);
+    }
+
+    // Cloud AI Fallback via Google Gemini
+    if (!parsedResult) {
+      if (CloudAIService.isConfigured()) {
+        try {
+          const cloudRes = await CloudAIService.analyzeResume({
+            resumeText,
+            targetRole,
+            targetJobDesc,
+          });
+          if (cloudRes && cloudRes.atsScore !== undefined) {
+            parsedResult = cloudRes;
+          }
+        } catch (cloudErr) {
+          console.warn('Cloud AI resume analysis fallback notice:', cloudErr.message);
+        }
+      }
     }
 
     // Intelligent calibrated fallback if Ollama was unreachable or returned incomplete JSON

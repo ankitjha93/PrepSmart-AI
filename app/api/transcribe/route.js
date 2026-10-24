@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { WaveFile } from 'wavefile';
 import { pipeline, env } from '@xenova/transformers';
+import { CloudAIService } from '@/utils/cloudAI';
 
 // On serverless environments like Vercel, ensure ONNX model cache writes to writable /tmp
 if (process.env.VERCEL) {
@@ -39,6 +40,23 @@ export async function POST(req) {
     // If audio payload is empty or too small to contain speech
     if (buffer.length < 500) {
       return NextResponse.json({ transcript: '' });
+    }
+
+    // 1. High-Speed Cloud Transcription via Google Gemini Flash (<800ms, zero serverless crash)
+    if (CloudAIService.isConfigured()) {
+      try {
+        const mimeType = file.type || 'audio/webm';
+        const transcript = await CloudAIService.transcribeAudio(buffer, mimeType);
+        if (typeof transcript === 'string') {
+          return NextResponse.json({
+            success: true,
+            engine: 'gemini',
+            transcript: transcript,
+          });
+        }
+      } catch (geminiErr) {
+        console.warn('Gemini multimodal audio transcription notice (falling back to local whisper):', geminiErr.message);
+      }
     }
 
     let audioData = null;
